@@ -1,15 +1,16 @@
-Microsoft (R) Macro Assembler Version 14.16.27026.1	    01/11/19 12:14:40
-#Program Template     (template.asm			     Page 1 - 1
+Microsoft (R) Macro Assembler Version 14.16.27026.1	    01/11/19 16:09:09
+Dog Years     (Project00.asm				     Page 1 - 1
 
 
-				TITLE Program Template     (template.asm)
+				TITLE Dog Years     (Project00.asm)
 
-				; Author:
-				; Last Modified:
-				; OSU email address: 
-				; Course number/section:
-				; Project Number:                 Due Date:
-				; Description:
+				; Author: Andrew Wilson
+				; Last Modified: Jan 11, 2019
+				; OSU email address: wilsoan6@oregonstate.edu
+				; Course number/section: 271-400
+				; Project Number: Demo #0                Due Date:
+				; Description: This program will introduce the programmer, get the user's age,
+				;			   calculate the user's dog age, and report the result.
 
 				INCLUDE Irvine32.inc
 			      C ; Include file for Irvine32.lib             (Irvine32.inc)
@@ -30,27 +31,109 @@ Microsoft (R) Macro Assembler Version 14.16.27026.1	    01/11/19 12:14:40
 			      C .LIST
 			      C 
 
-				; (insert constant definitions here)
+ = 00000007			DOG_FACTOR = 7
+
 
  00000000			.data
 
-				; (insert variable definitions here)
+ 00000000  00000021 [		userName	BYTE	33 DUP(0)	;string to be entered by user
+	    00
+	   ]
+ 00000021 00000000		userAge		DWORD	?			;integer to be entered by user
+ 00000025 48 69 2C 20 6D	intro_1		BYTE	"Hi, my name is Andrew, and I'm here to tell you your age in dog years. ", 0
+	   79 20 6E 61 6D
+	   65 20 69 73 20
+	   41 6E 64 72 65
+	   77 2C 20 61 6E
+	   64 20 49 27 6D
+	   20 68 65 72 65
+	   20 74 6F 20 74
+	   65 6C 6C 20 79
+	   6F 75 20 79 6F
+	   75 72 20 61 67
+	   65 20 69 6E 20
+	   64 6F 67 20 79
+	   65 61 72 73 2E
+	   20 00
+ 0000006D 57 68 61 74 27	prompt_1	BYTE	"What's your name? ", 0
+	   73 20 79 6F 75
+	   72 20 6E 61 6D
+	   65 3F 20 00
+ 00000080 4E 69 63 65 20	intro_2		BYTE	"Nice to meet you, ", 0
+	   74 6F 20 6D 65
+	   65 74 20 79 6F
+	   75 2C 20 00
+ 00000093 48 6F 77 20 6F	prompt_2	BYTE	"How old are you? ", 0
+	   6C 64 20 61 72
+	   65 20 79 6F 75
+	   3F 20 00
+ 000000A5 00000000		dogAge		DWORD	?
+ 000000A9 57 6F 77 20 2E	result_1	BYTE	"Wow ... that's ", 0
+	   2E 2E 20 74 68
+	   61 74 27 73 20
+	   00
+ 000000B9 20 69 6E 20 64	result_2	BYTE	" in dog years! ", 0
+	   6F 67 20 79 65
+	   61 72 73 21 20
+	   00
+ 000000C9 47 6F 6F 64 62	goodBye		BYTE	"Goodbye, ", 0
+	   79 65 2C 20 00
+
 
  00000000			.code
  00000000			main PROC
 
-				; (insert executable instructions here)
+				;Introduce programmer
+ 00000000  BA 00000025 R		mov		edx, OFFSET	intro_1
+ 00000005  E8 00000000 E		call	WriteString
+ 0000000A  E8 00000000 E		call	crlf
+
+				;Get user's name
+ 0000000F  BA 0000006D R		mov		edx, OFFSET	prompt_1
+ 00000014  E8 00000000 E		call	WriteString
+ 00000019  BA 00000000 R		mov		edx, OFFSET	userName
+ 0000001E  B9 00000020			mov		ecx, 32
+ 00000023  E8 00000000 E		call	ReadString
+
+
+				;Get user's age
+ 00000028  BA 00000093 R		mov		edx, OFFSET	prompt_2
+ 0000002D  E8 00000000 E		call	WriteString	
+ 00000032  E8 00000000 E		call	ReadInt
+ 00000037  A3 00000021 R		mov		userAge, eax
+
+				;Calc dog years
+ 0000003C  A1 00000021 R		mov		eax, userAge
+ 00000041  BB 00000007			mov		ebx, DOG_FACTOR
+ 00000046  F7 E3			mul		ebx
+ 00000048  A3 000000A5 R		mov		dogAge, eax
+
+				;Report results
+ 0000004D  BA 000000A9 R		mov		edx, OFFSET	result_1
+ 00000052  E8 00000000 E		call	WriteString
+ 00000057  A1 000000A5 R		mov		eax, dogAge
+ 0000005C  E8 00000000 E		call	WriteDec
+ 00000061  BA 000000B9 R		mov		edx, OFFSET	result_2
+ 00000066  E8 00000000 E		call	WriteString
+ 0000006B  E8 00000000 E		call	crlf
+
+				;Say goodbye
+ 00000070  BA 000000C9 R		mov		edx, OFFSET	goodBye
+ 00000075  E8 00000000 E		call	WriteString
+ 0000007A  BA 00000000 R		mov		edx, OFFSET	userName
+ 0000007F  E8 00000000 E		call	WriteString
+ 00000084  E8 00000000 E		call	crlf
 
 					exit	; exit to operating system
- 00000000  6A 00	   *	    push   +000000000h
- 00000002  E8 00000000 E   *	    call   ExitProcess
- 00000007			main ENDP
+ 00000089  6A 00	   *	    push   +000000000h
+ 0000008B  E8 00000000 E   *	    call   ExitProcess
+ 00000090			main ENDP
 
 				; (insert additional procedures here)
 
 				END main
-Microsoft (R) Macro Assembler Version 14.16.27026.1	    01/11/19 12:14:40
-#Program Template     (template.asm			     Symbols 2 - 1
+Microsoft (R) Macro Assembler Version 14.16.27026.1	    01/11/19 16:09:09
+Dog Years     (Project00.asm				     Symbols 2 - 1
 
 
 
@@ -143,8 +226,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000000 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000007 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 000000D3 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000090 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -251,7 +334,7 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000007 Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000090 Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -276,6 +359,7 @@ CREATE_ALWAYS  . . . . . . . . .	Number	 00000002h
 CREATE_NEW . . . . . . . . . . .	Number	 00000001h   
 CTRL_MASK  . . . . . . . . . . .	Number	 0000000Ch   
 CreateFile . . . . . . . . . . .	Text   	 CreateFileA
+DOG_FACTOR . . . . . . . . . . .	Number	 00000007h   
 DO_NOT_SHARE . . . . . . . . . .	Number	 00000000h   
 ENABLE_ECHO_INPUT  . . . . . . .	Number	 00000004h   
 ENABLE_LINE_INPUT  . . . . . . .	Number	 00000002h   
@@ -474,9 +558,13 @@ black  . . . . . . . . . . . . .	Number	 00000000h
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
+dogAge . . . . . . . . . . . . .	DWord	 000000A5 _DATA	
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
+goodBye  . . . . . . . . . . . .	Byte	 000000C9 _DATA	
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
+intro_1  . . . . . . . . . . . .	Byte	 00000025 _DATA	
+intro_2  . . . . . . . . . . . .	Byte	 00000080 _DATA	
 lightBlue  . . . . . . . . . . .	Number	 00000009h   
 lightCyan  . . . . . . . . . . .	Number	 0000000Bh   
 lightGray  . . . . . . . . . . .	Number	 00000007h   
@@ -484,7 +572,13 @@ lightGreen . . . . . . . . . . .	Number	 0000000Ah
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
 magenta  . . . . . . . . . . . .	Number	 00000005h   
+prompt_1 . . . . . . . . . . . .	Byte	 0000006D _DATA	
+prompt_2 . . . . . . . . . . . .	Byte	 00000093 _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
+result_1 . . . . . . . . . . . .	Byte	 000000A9 _DATA	
+result_2 . . . . . . . . . . . .	Byte	 000000B9 _DATA	
+userAge  . . . . . . . . . . . .	DWord	 00000021 _DATA	
+userName . . . . . . . . . . . .	Byte	 00000000 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   
