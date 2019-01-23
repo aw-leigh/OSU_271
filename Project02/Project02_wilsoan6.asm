@@ -17,7 +17,8 @@ INCLUDE Irvine32.inc
 ; (insert constant definitions here)
 
 .data
-
+FIBMAX = 46	;maximum value for user input
+FIBMIN = 1	;minimum value for user input
 numberOfNumbers	DWORD	?	;integer to be entered by user
 leftNumber		DWORD	0	;initial values for Fibonacci sequence
 rightNumber		DWORD	1	;initial values for Fibonacci sequence
@@ -26,10 +27,12 @@ count			DWORD	0	;for counting within loop
 userName		BYTE	33 DUP(0)	;string to be entered by user
 intro_1			BYTE	"     Fibonacci Numbers     by Andrew Wilson ", 0
 ec_1			BYTE	"**EC: Displays results in neat columns", 0
-ec_2			BYTE	"**EC: Displays results AMAZING TECHNICOLOR", 0
+ec_2			BYTE	"**EC: Displays results in INCREDIBLE TECHNICOLOR", 0
 prompt_1		BYTE	"What's your name? ", 0
 intro_2			BYTE	"Nice to meet you, ", 0
-prompt_2		BYTE	"How many numbers would you like to calculate? (1-46)", 0
+prompt_2		BYTE	"This program displays Fibonacci numbers!", 0
+prompt_3		BYTE	"How many numbers would you like to calculate? (1-", 0
+prompt_4		BYTE	")",0
 error_1			BYTE	"Please enter a number between 1-46",0
 five_spaces		BYTE	"     ",0
 goodBye			BYTE	"Goodbye, ", 0
@@ -37,7 +40,7 @@ goodBye			BYTE	"Goodbye, ", 0
 .code
 main PROC
 
-; display the program title and programmer name
+; Introduction (display the program title and programmer name)
 	mov		edx, OFFSET	intro_1
 	call	WriteString
 	call	crlf
@@ -49,7 +52,7 @@ main PROC
 	call	crlf
 	call	crlf
 
-; get the user's name and greet the user
+; getUserData (get the user's name and greet the user)
 	mov		edx, OFFSET	prompt_1
 	call	WriteString
 	mov		edx, OFFSET	userName
@@ -61,21 +64,29 @@ main PROC
 	mov		edx, OFFSET	userName
 	call	WriteString	
 	call	crlf
+	call	crlf
 
-; prompt the user to enter the number of Fibonacci numbers to be displayed (1-46)
+; userInstructions (prompt the user to enter the number of Fibonacci numbers to be displayed (1-46))
 RepromptInput:
 	mov		edx, OFFSET	prompt_2
+	call	WriteString
+	call	crlf
+	mov		edx, OFFSET	prompt_3
+	call	WriteString
+	mov		eax, FIBMAX
+	call	WriteDec
+	mov		edx, OFFSET	prompt_4
 	call	WriteString
 	call	crlf
 	call	ReadInt
 	mov		numberOfNumbers, eax
 
-; validate the input
+; dataValidation (validate the input)
 	mov		eax, numberOfNumbers
-	mov		ebx, 1
+	mov		ebx, FIBMIN
 	cmp		eax, ebx
 	jb		NumberTooLow
-	mov		ebx, 46
+	mov		ebx, FIBMAX
 	cmp		eax, ebx
 	jbe		InputGood
 NumberTooLow:
@@ -85,7 +96,7 @@ NumberTooLow:
 	call	crlf
 	jmp		RepromptInput
 
-; calculate and display the numbers up to and including the nth term
+; displayFibs (calculate and display the numbers up to and including the nth term)
 InputGood:
 	call	crlf
 	mov		ecx, numberOfNumbers
@@ -126,7 +137,9 @@ FinishedWithColors:
 	cmp		edx, 0
 	je		DivisibleBy5
 	jmp		NotDivisibleBy5
-
+LoopTooFarAway:
+	loop	top
+	jmp		LoopFinished
 
 DivisibleBy5:					;if count is divisible by 5, newline, except if 40 or more,
 	mov		eax, count			;because of the default console window size
@@ -134,9 +147,7 @@ DivisibleBy5:					;if count is divisible by 5, newline, except if 40 or more,
 	jge		NoNewline
 	call	crlf
 NoNewline:
-	dec		ecx					;decrement ecx, jumping to the top if not 0, or to the end if 0
-	jnz		top
-	jmp		LoopFinished
+	jmp		LoopTooFarAway		;Ideally would be "loop	top" but it's too far away
 
 
 NotDivisibleBy5:				;if count less than 35, tab. Otherwise, nothing
@@ -148,12 +159,10 @@ LessThan35:
 	mov		eax, 9	
 	call	WriteChar
 MoreThan35:						
-	dec		ecx					;decrement ecx, jumping to the top if not 0, or to the end if 0
-	jnz		top
-	jmp		LoopFinished
+	jmp		LoopTooFarAway		;Ideally would be "loop	top" but it's too far away
 
 
-;display a parting message to the user by name.
+;farewell (display a parting message to the user by name)
 LoopFinished:
 	mov		eax, lightgray + (black * 16) ;change text color, just for fun
 	call	SetTextColor
