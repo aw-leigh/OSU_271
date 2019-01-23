@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.16.27026.1	    01/18/19 15:34:19
+Microsoft (R) Macro Assembler Version 14.16.27026.1	    01/18/19 17:55:38
 %Simple Arithmetic     (Project01.asm			     Page 1 - 1
 
 
@@ -41,7 +41,7 @@ Microsoft (R) Macro Assembler Version 14.16.27026.1	    01/18/19 15:34:19
  00000010 00000000		difference		DWORD	?
  00000014 00000000		product			DWORD	?
  00000018 00000000		quotient		DWORD	?
- 0000001C 00000000		remainder		DWORD	?
+ 0000001C 00000000		result			DWORD	?
  00000020 00000000		f_remainder		DWORD	?
  00000024 20 20 20 20 20	intro_1			BYTE	"     Simple Arithmetic     by Andrew Wilson ", 0
 	   53 69 6D 70 6C
@@ -172,209 +172,31 @@ Microsoft (R) Macro Assembler Version 14.16.27026.1	    01/18/19 15:34:19
 
  00000000			.code
  00000000			main PROC
-
-				; initialize the FPU for division
- 00000000  9B DB E3			FINIT
-
-				;Introduce programmer and display program name
- 00000003  BA 00000024 R		mov		edx, OFFSET	intro_1
- 00000008  E8 00000000 E		call	WriteString
- 0000000D  E8 00000000 E		call	crlf
- 00000012  BA 00000051 R		mov		edx, OFFSET	ec_1
- 00000017  E8 00000000 E		call	WriteString
- 0000001C  E8 00000000 E		call	crlf
- 00000021  BA 0000007F R		mov		edx, OFFSET	ec_2
- 00000026  E8 00000000 E		call	WriteString
- 0000002B  E8 00000000 E		call	crlf
- 00000030  BA 000000B5 R		mov		edx, OFFSET	ec_3
- 00000035  E8 00000000 E		call	WriteString
- 0000003A  E8 00000000 E		call	crlf
- 0000003F  E8 00000000 E		call	crlf
-
- 00000044			repeat_entrypoint:	;jump here if user repeats/enters wrong values
-
-				;display instructions for the user
- 00000044  BA 00000112 R		mov		edx, OFFSET	intro_2
- 00000049  E8 00000000 E		call	WriteString
- 0000004E  E8 00000000 E		call	crlf
- 00000053  E8 00000000 E		call	crlf
-
-				;prompt for two numbers
- 00000058  BA 0000016C R		mov		edx, OFFSET	prompt_1
- 0000005D  E8 00000000 E		call	WriteString
- 00000062  E8 00000000 E		call	ReadInt
- 00000067  A3 00000000 R		mov		number_1, eax
-
- 0000006C  BA 0000017B R		mov		edx, OFFSET	prompt_2
- 00000071  E8 00000000 E		call	WriteString
- 00000076  E8 00000000 E		call	ReadInt
- 0000007B  A3 00000004 R		mov		number_2, eax
- 00000080  E8 00000000 E		call	crlf
-
-				;validate that the first number is greater than the second
- 00000085  A1 00000000 R		mov		eax, number_1	
- 0000008A  3B 05 00000004 R		CMP		eax, number_2
- 00000090  7E 02			jle		number_too_big
- 00000092  EB 16			jmp		everything_is_fine
-
-					;if the second number is equal to or greater than the first, display the error and jump back to initial promot
- 00000094				number_too_big: 
- 00000094  BA 0000018B R			mov		edx, OFFSET	prompt_error
- 00000099  E8 00000000 E			call	WriteString
- 0000009E  E8 00000000 E			call	crlf
- 000000A3  E8 00000000 E			call	crlf
- 000000A8  EB 9A				jmp		repeat_entrypoint
-
-					;if the second number is smaller than the first, keep going
- 000000AA				everything_is_fine:
-
-				;calculate sum
- 000000AA  A1 00000000 R		mov		eax, number_1
- 000000AF  03 05 00000004 R		add		eax, number_2
- 000000B5  A3 0000000C R		mov		sum, eax
-				;display sum
- 000000BA  A1 00000000 R		mov		eax, number_1
- 000000BF  E8 00000000 E		call	WriteDec
- 000000C4  BA 000001BA R		mov		edx, OFFSET	sum_string
- 000000C9  E8 00000000 E		call	WriteString
- 000000CE  A1 00000004 R		mov		eax, number_2
- 000000D3  E8 00000000 E		call	WriteDec
- 000000D8  BA 000001CA R		mov		edx, OFFSET	eqal_string
- 000000DD  E8 00000000 E		call	WriteString
- 000000E2  A1 0000000C R		mov		eax, sum
- 000000E7  E8 00000000 E		call	WriteDec
- 000000EC  E8 00000000 E		call	crlf
-
-				;calculate difference
- 000000F1  A1 00000000 R		mov		eax, number_1
- 000000F6  2B 05 00000004 R		sub		eax, number_2
- 000000FC  A3 00000010 R		mov		difference, eax	
-				;display difference
- 00000101  A1 00000000 R		mov		eax, number_1
- 00000106  E8 00000000 E		call	WriteDec
- 0000010B  BA 000001BE R		mov		edx, OFFSET	diff_string
- 00000110  E8 00000000 E		call	WriteString
- 00000115  A1 00000004 R		mov		eax, number_2
- 0000011A  E8 00000000 E		call	WriteDec
- 0000011F  BA 000001CA R		mov		edx, OFFSET	eqal_string
- 00000124  E8 00000000 E		call	WriteString
- 00000129  A1 00000010 R		mov		eax, difference
- 0000012E  E8 00000000 E		call	WriteDec
- 00000133  E8 00000000 E		call	crlf
-
-				;calculate product 
- 00000138  A1 00000000 R		mov		eax, number_1
- 0000013D  8B 1D 00000004 R		mov		ebx, number_2
- 00000143  F7 E3			mul		ebx
- 00000145  A3 00000018 R		mov		quotient, eax
-				;display product
- 0000014A  A1 00000000 R		mov		eax, number_1
- 0000014F  E8 00000000 E		call	WriteDec
- 00000154  BA 000001C2 R		mov		edx, OFFSET	prod_string
- 00000159  E8 00000000 E		call	WriteString
- 0000015E  A1 00000004 R		mov		eax, number_2
- 00000163  E8 00000000 E		call	WriteDec
- 00000168  BA 000001CA R		mov		edx, OFFSET	eqal_string
- 0000016D  E8 00000000 E		call	WriteString
- 00000172  A1 00000018 R		mov		eax, quotient
- 00000177  E8 00000000 E		call	WriteDec
- 0000017C  E8 00000000 E		call	crlf
-
-				;calculate quotient and remainder
- 00000181  A1 00000000 R		mov		eax, number_1
- 00000186  8B 1D 00000004 R		mov		ebx, number_2
- 0000018C  99				cdq
- 0000018D  F7 F3			div		ebx
- 0000018F  A3 00000018 R		mov		quotient, eax
- 00000194  89 15 0000001C R		mov		remainder, edx
+ 00000000  B8 00000001			mov	eax, 1
+ 00000005  BB 00000002			mov ebx, 2
+ 0000000A  B9 00000003			mov	ecx, 3
+ 0000000F  BA 00000004			mov	edx, 4
 
 
-				;display quotient and remainder
- 0000019A  A1 00000000 R		mov		eax, number_1
- 0000019F  E8 00000000 E		call	WriteDec
- 000001A4  BA 000001C6 R		mov		edx, OFFSET	quot_string
- 000001A9  E8 00000000 E		call	WriteString
- 000001AE  A1 00000004 R		mov		eax, number_2
- 000001B3  E8 00000000 E		call	WriteDec
- 000001B8  BA 000001CA R		mov		edx, OFFSET	eqal_string
- 000001BD  E8 00000000 E		call	WriteString
- 000001C2  A1 00000018 R		mov		eax, quotient
- 000001C7  E8 00000000 E		call	WriteDec
- 000001CC  BA 000001CE R		mov		edx, OFFSET	rem_string
- 000001D1  E8 00000000 E		call	WriteString
- 000001D6  A1 0000001C R		mov		eax, remainder
- 000001DB  E8 00000000 E		call	WriteDec
+ 00000014  8B D0			mov edx, eax
+ 00000016  8B D9			mov ebx, ecx
+ 00000018  8B DA			mov ebx, edx
+ 0000001A  8B CB			mov ecx, ebx
+ 0000001C  8B D0			mov edx, eax
+ 0000001E  8B C1		    mov	eax, ecx
 
-				;calculate floating-point remainder
+ 00000020  E8 00000000 E	   call   WriteDec
 
- 000001E0  A1 0000001C R		mov		eax, remainder		;multiplying the remainder by 1000
- 000001E5  BB 000003E8			mov		ebx, 1000
- 000001EA  F7 E3			mul		ebx
- 000001EC  A3 00000020 R		mov		f_remainder, eax
- 000001F1  A1 00000020 R		mov		eax, f_remainder	;then dividing it by number_2
- 000001F6  8B 1D 00000004 R		mov		ebx, number_2
- 000001FC  99				cdq
- 000001FD  F7 F3			div		ebx
- 000001FF  A3 00000020 R		mov		f_remainder, eax	;gives the first three digits after the decimal point
-
-
-				;display floating-point quotient
- 00000204  BA 000001DB R		mov		edx, OFFSET	dec_string_1
- 00000209  E8 00000000 E		call	WriteString
- 0000020E  A1 00000018 R		mov		eax, quotient
- 00000213  E8 00000000 E		call	WriteDec
- 00000218  BA 00000202 R		mov		edx, OFFSET	dec_dot
- 0000021D  E8 00000000 E		call	WriteString
-
-					
- 00000222  A1 00000020 R		mov		eax, f_remainder	;if the decimal starts with 0 (eg 1.025) we need to add a 0 to the output window
- 00000227  83 F8 64			CMP		eax, 100
- 0000022A  7C 02			jl		less_than_100
- 0000022C  EB 0A			jmp		not_less_than_100
-					
- 0000022E				less_than_100: 
- 0000022E  BA 00000204 R			mov		edx, OFFSET	dec_zero
- 00000233  E8 00000000 E			call	WriteString
-
- 00000238				not_less_than_100:
-
- 00000238  A1 00000020 R		mov		eax, f_remainder
- 0000023D  E8 00000000 E		call	WriteDec
- 00000242  BA 00000206 R		mov		edx, OFFSET	dec_string_2
- 00000247  E8 00000000 E		call	WriteString
-
- 0000024C  E8 00000000 E		call	crlf
- 00000251  E8 00000000 E		call	crlf
-
-				;ask if user wants to quit or repeat
- 00000256  BA 00000208 R		mov		edx, OFFSET	repeat_1
- 0000025B  E8 00000000 E		call	WriteString
- 00000260  E8 00000000 E		call	crlf
- 00000265  BA 0000022B R		mov		edx, OFFSET	repeat_2
- 0000026A  E8 00000000 E		call	WriteString
- 0000026F  E8 00000000 E		call	crlf
-
-				;reads user input, repeating the program unless '1' is entered
- 00000274  E8 00000000 E		call	ReadInt
- 00000279  E8 00000000 E		call	crlf
- 0000027E  A3 00000008 R		mov		repeat_choice, eax
- 00000283  83 F8 01			CMP		eax, 1
- 00000286  0F 85 FFFFFDB8		jne		repeat_entrypoint
-
-				;Say goodbye
- 0000028C  BA 00000269 R		mov		edx, OFFSET	goodBye
- 00000291  E8 00000000 E		call	WriteString
- 00000296  E8 00000000 E		call	crlf
 
 					exit	; exit to operating system
- 0000029B  6A 00	   *	    push   +000000000h
- 0000029D  E8 00000000 E   *	    call   ExitProcess
- 000002A2			main ENDP
+ 00000025  6A 00	   *	    push   +000000000h
+ 00000027  E8 00000000 E   *	    call   ExitProcess
+ 0000002C			main ENDP
 
 				; (insert additional procedures here)
 
 				END main
-Microsoft (R) Macro Assembler Version 14.16.27026.1	    01/18/19 15:34:19
+Microsoft (R) Macro Assembler Version 14.16.27026.1	    01/18/19 17:55:38
 %Simple Arithmetic     (Project01.asm			     Symbols 2 - 1
 
 
@@ -469,7 +291,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000272 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000002A2 Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000002C Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -576,12 +398,7 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000002A2 Public STDCALL
-  repeat_entrypoint  . . . . . .	L Near	 00000044 _TEXT	
-  number_too_big . . . . . . . .	L Near	 00000094 _TEXT	
-  everything_is_fine . . . . . .	L Near	 000000AA _TEXT	
-  less_than_100  . . . . . . . .	L Near	 0000022E _TEXT	
-  not_less_than_100  . . . . . .	L Near	 00000238 _TEXT	
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000002C Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -839,10 +656,10 @@ quot_string  . . . . . . . . . .	Byte	 000001C6 _DATA
 quotient . . . . . . . . . . . .	DWord	 00000018 _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
 rem_string . . . . . . . . . . .	Byte	 000001CE _DATA	
-remainder  . . . . . . . . . . .	DWord	 0000001C _DATA	
 repeat_1 . . . . . . . . . . . .	Byte	 00000208 _DATA	
 repeat_2 . . . . . . . . . . . .	Byte	 0000022B _DATA	
 repeat_choice  . . . . . . . . .	DWord	 00000008 _DATA	
+result . . . . . . . . . . . . .	DWord	 0000001C _DATA	
 sum_string . . . . . . . . . . .	Byte	 000001BA _DATA	
 sum  . . . . . . . . . . . . . .	DWord	 0000000C _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   

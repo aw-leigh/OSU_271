@@ -1,16 +1,20 @@
-Microsoft (R) Macro Assembler Version 14.16.27026.1	    01/23/19 11:04:01
-Dog Years     (Project00.asm				     Page 1 - 1
+Microsoft (R) Macro Assembler Version 14.16.27026.1	    01/23/19 13:00:54
+Fibonacci    (Project02.asm				     Page 1 - 1
 
 
-				TITLE Dog Years     (Project00.asm)
+				TITLE Fibonacci    (Project02.asm)
 
 				; Author: Andrew Wilson
-				; Last Modified: Jan 11, 2019
+				; Last Modified: Jan 23, 2019
 				; OSU email address: wilsoan6@oregonstate.edu
 				; Course number/section: 271-400
-				; Project Number: Demo #0                Due Date:
-				; Description: This program will introduce the programmer, get the user's age,
-				;			   calculate the user's dog age, and report the result.
+				; Project Number: #2                Due Date: Jan 27, 2019
+				; Description: This program will display the program title and programmer name,
+				;			   get the user's name and greet the user, then prompt the user to enter the number of
+				;			   Fibonacci numbers to be displayed (1-46).
+				;			   It will get and validate the input, calculate and display the numbers up to and including the nth term.
+				;			   The results will be displayed 5 terms per line with 5 spaces separating each.
+				;			   It will then display a parting message to the user by name.
 
 				INCLUDE Irvine32.inc
 			      C ; Include file for Irvine32.lib             (Irvine32.inc)
@@ -31,107 +35,188 @@ Microsoft (R) Macro Assembler Version 14.16.27026.1	    01/23/19 11:04:01
 			      C .LIST
 			      C 
 
- = 00000007			DOG_FACTOR = 7
-
+				; (insert constant definitions here)
 
  00000000			.data
 
- 00000000  00000021 [		userName	BYTE	33 DUP(0)	;string to be entered by user
+ 00000000 00000000		numberOfNumbers	DWORD	?	;integer to be entered by user
+ 00000004 00000000		leftNumber		DWORD	0	;initial values for Fibonacci sequence
+ 00000008 00000001		rightNumber		DWORD	1	;initial values for Fibonacci sequence
+ 0000000C 00000000		tempNumber		DWORD	?	;for swapping left and right
+ 00000010 00000000		count			DWORD	0	;for counting within loop
+ 00000014  00000021 [		userName		BYTE	33 DUP(0)	;string to be entered by user
 	    00
 	   ]
- 00000021 00000000		userAge		DWORD	?			;integer to be entered by user
- 00000025 48 69 2C 20 6D	intro_1		BYTE	"Hi, my name is Andrew, and I'm here to tell you your age in dog years. ", 0
-	   79 20 6E 61 6D
-	   65 20 69 73 20
+ 00000035 20 20 20 20 20	intro_1			BYTE	"     Fibonacci Numbers     by Andrew Wilson ", 0
+	   46 69 62 6F 6E
+	   61 63 63 69 20
+	   4E 75 6D 62 65
+	   72 73 20 20 20
+	   20 20 62 79 20
 	   41 6E 64 72 65
-	   77 2C 20 61 6E
-	   64 20 49 27 6D
-	   20 68 65 72 65
-	   20 74 6F 20 74
-	   65 6C 6C 20 79
-	   6F 75 20 79 6F
-	   75 72 20 61 67
-	   65 20 69 6E 20
-	   64 6F 67 20 79
-	   65 61 72 73 2E
-	   20 00
- 0000006D 57 68 61 74 27	prompt_1	BYTE	"What's your name? ", 0
+	   77 20 57 69 6C
+	   73 6F 6E 20 00
+ 00000062 2A 2A 45 43 3A	ec_1			BYTE	"**EC: Displays results in neat columns", 0
+	   20 44 69 73 70
+	   6C 61 79 73 20
+	   72 65 73 75 6C
+	   74 73 20 69 6E
+	   20 6E 65 61 74
+	   20 63 6F 6C 75
+	   6D 6E 73 00
+ 00000089 57 68 61 74 27	prompt_1		BYTE	"What's your name? ", 0
 	   73 20 79 6F 75
 	   72 20 6E 61 6D
 	   65 3F 20 00
- 00000080 4E 69 63 65 20	intro_2		BYTE	"Nice to meet you, ", 0
+ 0000009C 4E 69 63 65 20	intro_2			BYTE	"Nice to meet you, ", 0
 	   74 6F 20 6D 65
 	   65 74 20 79 6F
 	   75 2C 20 00
- 00000093 48 6F 77 20 6F	prompt_2	BYTE	"How old are you? ", 0
-	   6C 64 20 61 72
-	   65 20 79 6F 75
-	   3F 20 00
- 000000A5 00000000		dogAge		DWORD	?
- 000000A9 57 6F 77 20 2E	result_1	BYTE	"Wow ... that's ", 0
-	   2E 2E 20 74 68
-	   61 74 27 73 20
+ 000000AF 48 6F 77 20 6D	prompt_2		BYTE	"How many numbers would you like to calculate? (1-46)", 0
+	   61 6E 79 20 6E
+	   75 6D 62 65 72
+	   73 20 77 6F 75
+	   6C 64 20 79 6F
+	   75 20 6C 69 6B
+	   65 20 74 6F 20
+	   63 61 6C 63 75
+	   6C 61 74 65 3F
+	   20 28 31 2D 34
+	   36 29 00
+ 000000E4 50 6C 65 61 73	error_1			BYTE	"Please enter a number between 1-46",0
+	   65 20 65 6E 74
+	   65 72 20 61 20
+	   6E 75 6D 62 65
+	   72 20 62 65 74
+	   77 65 65 6E 20
+	   31 2D 34 36 00
+ 00000107 20 20 20 20 20	five_spaces		BYTE	"     ",0
 	   00
- 000000B9 20 69 6E 20 64	result_2	BYTE	" in dog years! ", 0
-	   6F 67 20 79 65
-	   61 72 73 21 20
-	   00
- 000000C9 47 6F 6F 64 62	goodBye		BYTE	"Goodbye, ", 0
+ 0000010D 47 6F 6F 64 62	goodBye			BYTE	"Goodbye, ", 0
 	   79 65 2C 20 00
 
-
  00000000			.code
-				;main PROC
+ 00000000			main PROC
 
-				;Introduce programmer
- 00000000  BA 00000025 R		mov		edx, OFFSET	intro_1
+				; display the program title and programmer name
+ 00000000  BA 00000035 R		mov		edx, OFFSET	intro_1
  00000005  E8 00000000 E		call	WriteString
  0000000A  E8 00000000 E		call	crlf
-
-				;Get user's name
- 0000000F  BA 0000006D R		mov		edx, OFFSET	prompt_1
+ 0000000F  BA 00000062 R		mov		edx, OFFSET	ec_1
  00000014  E8 00000000 E		call	WriteString
- 00000019  BA 00000000 R		mov		edx, OFFSET	userName
- 0000001E  B9 00000020			mov		ecx, 32
- 00000023  E8 00000000 E		call	ReadString
+ 00000019  E8 00000000 E		call	crlf
+ 0000001E  E8 00000000 E		call	crlf
 
+				; get the user's name and greet the user
+ 00000023  BA 00000089 R		mov		edx, OFFSET	prompt_1
+ 00000028  E8 00000000 E		call	WriteString
+ 0000002D  BA 00000014 R		mov		edx, OFFSET	userName
+ 00000032  B9 00000020			mov		ecx, 32
+ 00000037  E8 00000000 E		call	ReadString
+ 0000003C  E8 00000000 E		call	crlf
+ 00000041  BA 0000009C R		mov		edx, OFFSET	intro_2
+ 00000046  E8 00000000 E		call	WriteString	
+ 0000004B  BA 00000014 R		mov		edx, OFFSET	userName
+ 00000050  E8 00000000 E		call	WriteString	
+ 00000055  E8 00000000 E		call	crlf
 
-				;Get user's age
- 00000028  BA 00000093 R		mov		edx, OFFSET	prompt_2
- 0000002D  E8 00000000 E		call	WriteString	
- 00000032  E8 00000000 E		call	ReadInt
- 00000037  A3 00000021 R		mov		userAge, eax
+				; prompt the user to enter the number of Fibonacci numbers to be displayed (1-46)
+ 0000005A			RepromptInput:
+ 0000005A  BA 000000AF R		mov		edx, OFFSET	prompt_2
+ 0000005F  E8 00000000 E		call	WriteString
+ 00000064  E8 00000000 E		call	crlf
+ 00000069  E8 00000000 E		call	ReadInt
+ 0000006E  A3 00000000 R		mov		numberOfNumbers, eax
 
-				;Calc dog years
- 0000003C  A1 00000021 R		mov		eax, userAge
- 00000041  BB 00000007			mov		ebx, DOG_FACTOR
- 00000046  F7 E3			mul		ebx
- 00000048  A3 000000A5 R		mov		dogAge, eax
+				; validate the input
+ 00000073  A1 00000000 R		mov		eax, numberOfNumbers
+ 00000078  BB 00000001			mov		ebx, 1
+ 0000007D  3B C3			cmp		eax, ebx
+ 0000007F  72 09			jb		NumberTooLow
+ 00000081  BB 0000002E			mov		ebx, 46
+ 00000086  3B C3			cmp		eax, ebx
+ 00000088  76 16			jbe		InputGood
+ 0000008A			NumberTooLow:
+ 0000008A  BA 000000E4 R		mov		edx, OFFSET	error_1
+ 0000008F  E8 00000000 E		call	WriteString
+ 00000094  E8 00000000 E		call	crlf
+ 00000099  E8 00000000 E		call	crlf
+ 0000009E  EB BA			jmp		RepromptInput
 
-				;Report results
- 0000004D  BA 000000A9 R		mov		edx, OFFSET	result_1
- 00000052  E8 00000000 E		call	WriteString
- 00000057  A1 000000A5 R		mov		eax, dogAge
- 0000005C  E8 00000000 E		call	WriteDec
- 00000061  BA 000000B9 R		mov		edx, OFFSET	result_2
- 00000066  E8 00000000 E		call	WriteString
- 0000006B  E8 00000000 E		call	crlf
+				; calculate and display the numbers up to and including the nth term
+ 000000A0			InputGood:
+ 000000A0  E8 00000000 E		call	crlf
+ 000000A5  8B 0D 00000000 R		mov		ecx, numberOfNumbers
+ 000000AB			top:
+ 000000AB  A1 00000008 R		mov		eax, rightNumber	;display current number
+ 000000B0  E8 00000000 E		call	WriteDec
 
-				;Say goodbye
- 00000070  BA 000000C9 R		mov		edx, OFFSET	goodBye
- 00000075  E8 00000000 E		call	WriteString
- 0000007A  BA 00000000 R		mov		edx, OFFSET	userName
- 0000007F  E8 00000000 E		call	WriteString
- 00000084  E8 00000000 E		call	crlf
+ 000000B5  03 05 00000004 R		add		eax, leftNumber		;calculate and store next values
+ 000000BB  A3 0000000C R		mov		tempNumber, eax
+ 000000C0  A1 00000008 R		mov		eax, rightNumber
+ 000000C5  A3 00000004 R		mov		leftNumber, eax
+ 000000CA  A1 0000000C R		mov		eax, tempNumber
+ 000000CF  A3 00000008 R		mov		rightNumber, eax
 
-				;	exit	; exit to operating system
-				;main ENDP
+ 000000D4  B8 00000009			mov		eax, 9				;9 is ASCII tab, used to space columns
+ 000000D9  E8 00000000 E		call	WriteChar
+ 000000DE  E8 00000000 E		call	WriteChar
+
+ 000000E3  FF 05 00000010 R		inc		count				;check if count is divisible by 5
+ 000000E9  A1 00000010 R		mov		eax, count
+ 000000EE  BB 00000005			mov		ebx, 5
+ 000000F3  99				cdq
+ 000000F4  F7 F3			div		ebx
+ 000000F6  83 FA 00			cmp		edx, 0
+ 000000F9  74 02			je		DivisibleBy5
+ 000000FB  EB 13			jmp		NotDivisibleBy5
+
+ 000000FD			DivisibleBy5:					;if count is divisible by 5, newline, except if 40 or more
+ 000000FD  A1 00000010 R		mov		eax, count
+ 00000102  83 F8 28			cmp		eax, 40				
+ 00000105  7D 05			jge		NoNewline
+ 00000107  E8 00000000 E		call	crlf
+ 0000010C			NoNewline:
+ 0000010C  E2 9D			loop	top	
+ 0000010E  EB 1D			jmp		LoopFinished
+
+ 00000110			NotDivisibleBy5:				;if count less than 35, tab. Otherwise, nothing
+ 00000110  8B 1D 00000010 R		mov		ebx, count
+ 00000116  83 FB 23			cmp		ebx, 35
+ 00000119  7F 10			jg		MoreThan35
+ 0000011B  EB 00			jmp		LessThan35
+
+ 0000011D			LessThan35:						
+ 0000011D  B8 00000009			mov		eax, 9	
+ 00000122  E8 00000000 E		call	WriteChar
+ 00000127  E2 82			loop	top
+ 00000129  EB 02			jmp		LoopFinished
+
+ 0000012B			MoreThan35:						
+ 0000012B  EB DF			jmp		NoNewline			;we should have "loop	top" here but it is too by 2 byes.
+												;Instead we jump to NoNewLine because all it does is loop
+												;and jump to the end if loop is finished
+
+				;display a parting message to the user by name.
+ 0000012D			LoopFinished:
+ 0000012D  E8 00000000 E		call	crlf
+ 00000132  E8 00000000 E		call	crlf
+ 00000137  BA 0000010D R		mov		edx, OFFSET	goodBye
+ 0000013C  E8 00000000 E		call	WriteString
+ 00000141  BA 00000014 R		mov		edx, OFFSET	userName
+ 00000146  E8 00000000 E		call	WriteString	
+ 0000014B  E8 00000000 E		call	crlf
+
+					exit	; exit to operating system
+ 00000150  6A 00	   *	    push   +000000000h
+ 00000152  E8 00000000 E   *	    call   ExitProcess
+ 00000157			main ENDP
 
 				; (insert additional procedures here)
 
 				END main
-Microsoft (R) Macro Assembler Version 14.16.27026.1	    01/23/19 11:04:01
-Dog Years     (Project00.asm				     Symbols 2 - 1
+Microsoft (R) Macro Assembler Version 14.16.27026.1	    01/23/19 13:00:54
+Fibonacci    (Project02.asm				     Symbols 2 - 1
 
 
 
@@ -224,8 +309,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 000000D3 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000089 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000117 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000157 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -332,6 +417,17 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000157 Public STDCALL
+  RepromptInput  . . . . . . . .	L Near	 0000005A _TEXT	
+  NumberTooLow . . . . . . . . .	L Near	 0000008A _TEXT	
+  InputGood  . . . . . . . . . .	L Near	 000000A0 _TEXT	
+  top  . . . . . . . . . . . . .	L Near	 000000AB _TEXT	
+  DivisibleBy5 . . . . . . . . .	L Near	 000000FD _TEXT	
+  NoNewline  . . . . . . . . . .	L Near	 0000010C _TEXT	
+  NotDivisibleBy5  . . . . . . .	L Near	 00000110 _TEXT	
+  LessThan35 . . . . . . . . . .	L Near	 0000011D _TEXT	
+  MoreThan35 . . . . . . . . . .	L Near	 0000012B _TEXT	
+  LoopFinished . . . . . . . . .	L Near	 0000012D _TEXT	
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -356,7 +452,6 @@ CREATE_ALWAYS  . . . . . . . . .	Number	 00000002h
 CREATE_NEW . . . . . . . . . . .	Number	 00000001h   
 CTRL_MASK  . . . . . . . . . . .	Number	 0000000Ch   
 CreateFile . . . . . . . . . . .	Text   	 CreateFileA
-DOG_FACTOR . . . . . . . . . . .	Number	 00000007h   
 DO_NOT_SHARE . . . . . . . . . .	Number	 00000000h   
 ENABLE_ECHO_INPUT  . . . . . . .	Number	 00000004h   
 ENABLE_LINE_INPUT  . . . . . . .	Number	 00000002h   
@@ -554,14 +649,18 @@ WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
+count  . . . . . . . . . . . . .	DWord	 00000010 _DATA	
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
-dogAge . . . . . . . . . . . . .	DWord	 000000A5 _DATA	
+ec_1 . . . . . . . . . . . . . .	Byte	 00000062 _DATA	
+error_1  . . . . . . . . . . . .	Byte	 000000E4 _DATA	
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
-goodBye  . . . . . . . . . . . .	Byte	 000000C9 _DATA	
+five_spaces  . . . . . . . . . .	Byte	 00000107 _DATA	
+goodBye  . . . . . . . . . . . .	Byte	 0000010D _DATA	
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
-intro_1  . . . . . . . . . . . .	Byte	 00000025 _DATA	
-intro_2  . . . . . . . . . . . .	Byte	 00000080 _DATA	
+intro_1  . . . . . . . . . . . .	Byte	 00000035 _DATA	
+intro_2  . . . . . . . . . . . .	Byte	 0000009C _DATA	
+leftNumber . . . . . . . . . . .	DWord	 00000004 _DATA	
 lightBlue  . . . . . . . . . . .	Number	 00000009h   
 lightCyan  . . . . . . . . . . .	Number	 0000000Bh   
 lightGray  . . . . . . . . . . .	Number	 00000007h   
@@ -569,16 +668,16 @@ lightGreen . . . . . . . . . . .	Number	 0000000Ah
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
 magenta  . . . . . . . . . . . .	Number	 00000005h   
-prompt_1 . . . . . . . . . . . .	Byte	 0000006D _DATA	
-prompt_2 . . . . . . . . . . . .	Byte	 00000093 _DATA	
+numberOfNumbers  . . . . . . . .	DWord	 00000000 _DATA	
+prompt_1 . . . . . . . . . . . .	Byte	 00000089 _DATA	
+prompt_2 . . . . . . . . . . . .	Byte	 000000AF _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
-result_1 . . . . . . . . . . . .	Byte	 000000A9 _DATA	
-result_2 . . . . . . . . . . . .	Byte	 000000B9 _DATA	
-userAge  . . . . . . . . . . . .	DWord	 00000021 _DATA	
-userName . . . . . . . . . . . .	Byte	 00000000 _DATA	
+rightNumber  . . . . . . . . . .	DWord	 00000008 _DATA	
+tempNumber . . . . . . . . . . .	DWord	 0000000C _DATA	
+userName . . . . . . . . . . . .	Byte	 00000014 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   
 
 	   0 Warnings
-	   2 Errors
+	   0 Errors
