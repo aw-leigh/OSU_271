@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.16.27026.1	    01/23/19 13:00:54
+Microsoft (R) Macro Assembler Version 14.16.27026.1	    01/23/19 13:41:28
 Fibonacci    (Project02.asm				     Page 1 - 1
 
 
@@ -64,15 +64,24 @@ Microsoft (R) Macro Assembler Version 14.16.27026.1	    01/23/19 13:00:54
 	   20 6E 65 61 74
 	   20 63 6F 6C 75
 	   6D 6E 73 00
- 00000089 57 68 61 74 27	prompt_1		BYTE	"What's your name? ", 0
+ 00000089 2A 2A 45 43 3A	ec_2			BYTE	"**EC: Displays results AMAZING TECHNICOLOR", 0
+	   20 44 69 73 70
+	   6C 61 79 73 20
+	   72 65 73 75 6C
+	   74 73 20 41 4D
+	   41 5A 49 4E 47
+	   20 54 45 43 48
+	   4E 49 43 4F 4C
+	   4F 52 00
+ 000000B4 57 68 61 74 27	prompt_1		BYTE	"What's your name? ", 0
 	   73 20 79 6F 75
 	   72 20 6E 61 6D
 	   65 3F 20 00
- 0000009C 4E 69 63 65 20	intro_2			BYTE	"Nice to meet you, ", 0
+ 000000C7 4E 69 63 65 20	intro_2			BYTE	"Nice to meet you, ", 0
 	   74 6F 20 6D 65
 	   65 74 20 79 6F
 	   75 2C 20 00
- 000000AF 48 6F 77 20 6D	prompt_2		BYTE	"How many numbers would you like to calculate? (1-46)", 0
+ 000000DA 48 6F 77 20 6D	prompt_2		BYTE	"How many numbers would you like to calculate? (1-46)", 0
 	   61 6E 79 20 6E
 	   75 6D 62 65 72
 	   73 20 77 6F 75
@@ -83,16 +92,16 @@ Microsoft (R) Macro Assembler Version 14.16.27026.1	    01/23/19 13:00:54
 	   6C 61 74 65 3F
 	   20 28 31 2D 34
 	   36 29 00
- 000000E4 50 6C 65 61 73	error_1			BYTE	"Please enter a number between 1-46",0
+ 0000010F 50 6C 65 61 73	error_1			BYTE	"Please enter a number between 1-46",0
 	   65 20 65 6E 74
 	   65 72 20 61 20
 	   6E 75 6D 62 65
 	   72 20 62 65 74
 	   77 65 65 6E 20
 	   31 2D 34 36 00
- 00000107 20 20 20 20 20	five_spaces		BYTE	"     ",0
+ 00000132 20 20 20 20 20	five_spaces		BYTE	"     ",0
 	   00
- 0000010D 47 6F 6F 64 62	goodBye			BYTE	"Goodbye, ", 0
+ 00000138 47 6F 6F 64 62	goodBye			BYTE	"Goodbye, ", 0
 	   79 65 2C 20 00
 
  00000000			.code
@@ -105,117 +114,136 @@ Microsoft (R) Macro Assembler Version 14.16.27026.1	    01/23/19 13:00:54
  0000000F  BA 00000062 R		mov		edx, OFFSET	ec_1
  00000014  E8 00000000 E		call	WriteString
  00000019  E8 00000000 E		call	crlf
- 0000001E  E8 00000000 E		call	crlf
+ 0000001E  BA 00000089 R		mov		edx, OFFSET	ec_2
+ 00000023  E8 00000000 E		call	WriteString
+ 00000028  E8 00000000 E		call	crlf
+ 0000002D  E8 00000000 E		call	crlf
 
 				; get the user's name and greet the user
- 00000023  BA 00000089 R		mov		edx, OFFSET	prompt_1
- 00000028  E8 00000000 E		call	WriteString
- 0000002D  BA 00000014 R		mov		edx, OFFSET	userName
- 00000032  B9 00000020			mov		ecx, 32
- 00000037  E8 00000000 E		call	ReadString
- 0000003C  E8 00000000 E		call	crlf
- 00000041  BA 0000009C R		mov		edx, OFFSET	intro_2
- 00000046  E8 00000000 E		call	WriteString	
- 0000004B  BA 00000014 R		mov		edx, OFFSET	userName
- 00000050  E8 00000000 E		call	WriteString	
- 00000055  E8 00000000 E		call	crlf
+ 00000032  BA 000000B4 R		mov		edx, OFFSET	prompt_1
+ 00000037  E8 00000000 E		call	WriteString
+ 0000003C  BA 00000014 R		mov		edx, OFFSET	userName
+ 00000041  B9 00000020			mov		ecx, 32
+ 00000046  E8 00000000 E		call	ReadString
+ 0000004B  E8 00000000 E		call	crlf
+ 00000050  BA 000000C7 R		mov		edx, OFFSET	intro_2
+ 00000055  E8 00000000 E		call	WriteString	
+ 0000005A  BA 00000014 R		mov		edx, OFFSET	userName
+ 0000005F  E8 00000000 E		call	WriteString	
+ 00000064  E8 00000000 E		call	crlf
 
 				; prompt the user to enter the number of Fibonacci numbers to be displayed (1-46)
- 0000005A			RepromptInput:
- 0000005A  BA 000000AF R		mov		edx, OFFSET	prompt_2
- 0000005F  E8 00000000 E		call	WriteString
- 00000064  E8 00000000 E		call	crlf
- 00000069  E8 00000000 E		call	ReadInt
- 0000006E  A3 00000000 R		mov		numberOfNumbers, eax
+ 00000069			RepromptInput:
+ 00000069  BA 000000DA R		mov		edx, OFFSET	prompt_2
+ 0000006E  E8 00000000 E		call	WriteString
+ 00000073  E8 00000000 E		call	crlf
+ 00000078  E8 00000000 E		call	ReadInt
+ 0000007D  A3 00000000 R		mov		numberOfNumbers, eax
 
 				; validate the input
- 00000073  A1 00000000 R		mov		eax, numberOfNumbers
- 00000078  BB 00000001			mov		ebx, 1
- 0000007D  3B C3			cmp		eax, ebx
- 0000007F  72 09			jb		NumberTooLow
- 00000081  BB 0000002E			mov		ebx, 46
- 00000086  3B C3			cmp		eax, ebx
- 00000088  76 16			jbe		InputGood
- 0000008A			NumberTooLow:
- 0000008A  BA 000000E4 R		mov		edx, OFFSET	error_1
- 0000008F  E8 00000000 E		call	WriteString
- 00000094  E8 00000000 E		call	crlf
- 00000099  E8 00000000 E		call	crlf
- 0000009E  EB BA			jmp		RepromptInput
+ 00000082  A1 00000000 R		mov		eax, numberOfNumbers
+ 00000087  BB 00000001			mov		ebx, 1
+ 0000008C  3B C3			cmp		eax, ebx
+ 0000008E  72 09			jb		NumberTooLow
+ 00000090  BB 0000002E			mov		ebx, 46
+ 00000095  3B C3			cmp		eax, ebx
+ 00000097  76 16			jbe		InputGood
+ 00000099			NumberTooLow:
+ 00000099  BA 0000010F R		mov		edx, OFFSET	error_1
+ 0000009E  E8 00000000 E		call	WriteString
+ 000000A3  E8 00000000 E		call	crlf
+ 000000A8  E8 00000000 E		call	crlf
+ 000000AD  EB BA			jmp		RepromptInput
 
 				; calculate and display the numbers up to and including the nth term
- 000000A0			InputGood:
- 000000A0  E8 00000000 E		call	crlf
- 000000A5  8B 0D 00000000 R		mov		ecx, numberOfNumbers
- 000000AB			top:
- 000000AB  A1 00000008 R		mov		eax, rightNumber	;display current number
- 000000B0  E8 00000000 E		call	WriteDec
+ 000000AF			InputGood:
+ 000000AF  E8 00000000 E		call	crlf
+ 000000B4  8B 0D 00000000 R		mov		ecx, numberOfNumbers
 
- 000000B5  03 05 00000004 R		add		eax, leftNumber		;calculate and store next values
- 000000BB  A3 0000000C R		mov		tempNumber, eax
- 000000C0  A1 00000008 R		mov		eax, rightNumber
- 000000C5  A3 00000004 R		mov		leftNumber, eax
- 000000CA  A1 0000000C R		mov		eax, tempNumber
- 000000CF  A3 00000008 R		mov		rightNumber, eax
+ 000000BA			top:
+ 000000BA  FF 05 00000010 R		inc		count
+ 000000C0  A1 00000010 R		mov		eax, count
+ 000000C5  66| A9 0001			test	ax, 1				;test if even or odd to deterine color (LSB is 1 or 0)
+ 000000C9  75 02			jnz		Color1
+ 000000CB  74 0C			jz		Color2
+ 000000CD			Color1:
+ 000000CD  B8 0000002A			mov		eax, lightgreen + (green * 16)	;change text color, just for fun
+ 000000D2  E8 00000000 E		call	SetTextColor
+ 000000D7  EB 0A			jmp		FinishedWithColors
+ 000000D9			Color2:
+ 000000D9  B8 00000019			mov		eax, lightblue + (blue * 16)	;change text color, just for fun
+ 000000DE  E8 00000000 E		call	SetTextColor
 
- 000000D4  B8 00000009			mov		eax, 9				;9 is ASCII tab, used to space columns
- 000000D9  E8 00000000 E		call	WriteChar
- 000000DE  E8 00000000 E		call	WriteChar
+ 000000E3			FinishedWithColors:
+ 000000E3  A1 00000008 R		mov		eax, rightNumber	;display current number
+ 000000E8  E8 00000000 E		call	WriteDec
 
- 000000E3  FF 05 00000010 R		inc		count				;check if count is divisible by 5
- 000000E9  A1 00000010 R		mov		eax, count
- 000000EE  BB 00000005			mov		ebx, 5
- 000000F3  99				cdq
- 000000F4  F7 F3			div		ebx
- 000000F6  83 FA 00			cmp		edx, 0
- 000000F9  74 02			je		DivisibleBy5
- 000000FB  EB 13			jmp		NotDivisibleBy5
+ 000000ED  03 05 00000004 R		add		eax, leftNumber		;calculate and store next values
+ 000000F3  A3 0000000C R		mov		tempNumber, eax
+ 000000F8  A1 00000008 R		mov		eax, rightNumber
+ 000000FD  A3 00000004 R		mov		leftNumber, eax
+ 00000102  A1 0000000C R		mov		eax, tempNumber
+ 00000107  A3 00000008 R		mov		rightNumber, eax
 
- 000000FD			DivisibleBy5:					;if count is divisible by 5, newline, except if 40 or more
- 000000FD  A1 00000010 R		mov		eax, count
- 00000102  83 F8 28			cmp		eax, 40				
- 00000105  7D 05			jge		NoNewline
- 00000107  E8 00000000 E		call	crlf
- 0000010C			NoNewline:
- 0000010C  E2 9D			loop	top	
- 0000010E  EB 1D			jmp		LoopFinished
+ 0000010C  B8 00000009			mov		eax, 9				;9 is ASCII tab, used to space columns
+ 00000111  E8 00000000 E		call	WriteChar
+ 00000116  E8 00000000 E		call	WriteChar
 
- 00000110			NotDivisibleBy5:				;if count less than 35, tab. Otherwise, nothing
- 00000110  8B 1D 00000010 R		mov		ebx, count
- 00000116  83 FB 23			cmp		ebx, 35
- 00000119  7F 10			jg		MoreThan35
- 0000011B  EB 00			jmp		LessThan35
+ 0000011B  A1 00000010 R		mov		eax, count			;check if count is divisible by 5
+ 00000120  BB 00000005			mov		ebx, 5
+ 00000125  99				cdq
+ 00000126  F7 F3			div		ebx
+ 00000128  83 FA 00			cmp		edx, 0
+ 0000012B  74 02			je		DivisibleBy5
+ 0000012D  EB 18			jmp		NotDivisibleBy5
 
- 0000011D			LessThan35:						
- 0000011D  B8 00000009			mov		eax, 9	
- 00000122  E8 00000000 E		call	WriteChar
- 00000127  E2 82			loop	top
- 00000129  EB 02			jmp		LoopFinished
 
- 0000012B			MoreThan35:						
- 0000012B  EB DF			jmp		NoNewline			;we should have "loop	top" here but it is too by 2 byes.
-												;Instead we jump to NoNewLine because all it does is loop
-												;and jump to the end if loop is finished
+ 0000012F			DivisibleBy5:					;if count is divisible by 5, newline, except if 40 or more,
+ 0000012F  A1 00000010 R		mov		eax, count			;because of the default console window size
+ 00000134  83 F8 28			cmp		eax, 40				
+ 00000137  7D 05			jge		NoNewline
+ 00000139  E8 00000000 E		call	crlf
+ 0000013E			NoNewline:
+ 0000013E  49				dec		ecx					;decrement ecx, jumping to the top if not 0, or to the end if 0
+ 0000013F  0F 85 FFFFFF75		jnz		top
+ 00000145  EB 20			jmp		LoopFinished
+
+
+ 00000147			NotDivisibleBy5:				;if count less than 35, tab. Otherwise, nothing
+ 00000147  8B 1D 00000010 R		mov		ebx, count
+ 0000014D  83 FB 23			cmp		ebx, 35
+ 00000150  7F 0C			jg		MoreThan35
+ 00000152  EB 00			jmp		LessThan35
+ 00000154			LessThan35:						
+ 00000154  B8 00000009			mov		eax, 9	
+ 00000159  E8 00000000 E		call	WriteChar
+ 0000015E			MoreThan35:						
+ 0000015E  49				dec		ecx					;decrement ecx, jumping to the top if not 0, or to the end if 0
+ 0000015F  0F 85 FFFFFF55		jnz		top
+ 00000165  EB 00			jmp		LoopFinished
+
 
 				;display a parting message to the user by name.
- 0000012D			LoopFinished:
- 0000012D  E8 00000000 E		call	crlf
- 00000132  E8 00000000 E		call	crlf
- 00000137  BA 0000010D R		mov		edx, OFFSET	goodBye
- 0000013C  E8 00000000 E		call	WriteString
- 00000141  BA 00000014 R		mov		edx, OFFSET	userName
- 00000146  E8 00000000 E		call	WriteString	
- 0000014B  E8 00000000 E		call	crlf
+ 00000167			LoopFinished:
+ 00000167  B8 00000007			mov		eax, lightgray + (black * 16) ;change text color, just for fun
+ 0000016C  E8 00000000 E		call	SetTextColor
+ 00000171  E8 00000000 E		call	crlf
+ 00000176  E8 00000000 E		call	crlf
+ 0000017B  BA 00000138 R		mov		edx, OFFSET	goodBye
+ 00000180  E8 00000000 E		call	WriteString
+ 00000185  BA 00000014 R		mov		edx, OFFSET	userName
+ 0000018A  E8 00000000 E		call	WriteString	
+ 0000018F  E8 00000000 E		call	crlf
 
 					exit	; exit to operating system
- 00000150  6A 00	   *	    push   +000000000h
- 00000152  E8 00000000 E   *	    call   ExitProcess
- 00000157			main ENDP
+ 00000194  6A 00	   *	    push   +000000000h
+ 00000196  E8 00000000 E   *	    call   ExitProcess
+ 0000019B			main ENDP
 
 				; (insert additional procedures here)
 
 				END main
-Microsoft (R) Macro Assembler Version 14.16.27026.1	    01/23/19 13:00:54
+Microsoft (R) Macro Assembler Version 14.16.27026.1	    01/23/19 13:41:28
 Fibonacci    (Project02.asm				     Symbols 2 - 1
 
 
@@ -309,8 +337,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000117 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000157 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000142 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000019B Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -417,17 +445,20 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000157 Public STDCALL
-  RepromptInput  . . . . . . . .	L Near	 0000005A _TEXT	
-  NumberTooLow . . . . . . . . .	L Near	 0000008A _TEXT	
-  InputGood  . . . . . . . . . .	L Near	 000000A0 _TEXT	
-  top  . . . . . . . . . . . . .	L Near	 000000AB _TEXT	
-  DivisibleBy5 . . . . . . . . .	L Near	 000000FD _TEXT	
-  NoNewline  . . . . . . . . . .	L Near	 0000010C _TEXT	
-  NotDivisibleBy5  . . . . . . .	L Near	 00000110 _TEXT	
-  LessThan35 . . . . . . . . . .	L Near	 0000011D _TEXT	
-  MoreThan35 . . . . . . . . . .	L Near	 0000012B _TEXT	
-  LoopFinished . . . . . . . . .	L Near	 0000012D _TEXT	
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000019B Public STDCALL
+  RepromptInput  . . . . . . . .	L Near	 00000069 _TEXT	
+  NumberTooLow . . . . . . . . .	L Near	 00000099 _TEXT	
+  InputGood  . . . . . . . . . .	L Near	 000000AF _TEXT	
+  top  . . . . . . . . . . . . .	L Near	 000000BA _TEXT	
+  Color1 . . . . . . . . . . . .	L Near	 000000CD _TEXT	
+  Color2 . . . . . . . . . . . .	L Near	 000000D9 _TEXT	
+  FinishedWithColors . . . . . .	L Near	 000000E3 _TEXT	
+  DivisibleBy5 . . . . . . . . .	L Near	 0000012F _TEXT	
+  NoNewline  . . . . . . . . . .	L Near	 0000013E _TEXT	
+  NotDivisibleBy5  . . . . . . .	L Near	 00000147 _TEXT	
+  LessThan35 . . . . . . . . . .	L Near	 00000154 _TEXT	
+  MoreThan35 . . . . . . . . . .	L Near	 0000015E _TEXT	
+  LoopFinished . . . . . . . . .	L Near	 00000167 _TEXT	
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -652,14 +683,15 @@ brown  . . . . . . . . . . . . .	Number	 00000006h
 count  . . . . . . . . . . . . .	DWord	 00000010 _DATA	
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
 ec_1 . . . . . . . . . . . . . .	Byte	 00000062 _DATA	
-error_1  . . . . . . . . . . . .	Byte	 000000E4 _DATA	
+ec_2 . . . . . . . . . . . . . .	Byte	 00000089 _DATA	
+error_1  . . . . . . . . . . . .	Byte	 0000010F _DATA	
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
-five_spaces  . . . . . . . . . .	Byte	 00000107 _DATA	
-goodBye  . . . . . . . . . . . .	Byte	 0000010D _DATA	
+five_spaces  . . . . . . . . . .	Byte	 00000132 _DATA	
+goodBye  . . . . . . . . . . . .	Byte	 00000138 _DATA	
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
 intro_1  . . . . . . . . . . . .	Byte	 00000035 _DATA	
-intro_2  . . . . . . . . . . . .	Byte	 0000009C _DATA	
+intro_2  . . . . . . . . . . . .	Byte	 000000C7 _DATA	
 leftNumber . . . . . . . . . . .	DWord	 00000004 _DATA	
 lightBlue  . . . . . . . . . . .	Number	 00000009h   
 lightCyan  . . . . . . . . . . .	Number	 0000000Bh   
@@ -669,8 +701,8 @@ lightMagenta . . . . . . . . . .	Number	 0000000Dh
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
 magenta  . . . . . . . . . . . .	Number	 00000005h   
 numberOfNumbers  . . . . . . . .	DWord	 00000000 _DATA	
-prompt_1 . . . . . . . . . . . .	Byte	 00000089 _DATA	
-prompt_2 . . . . . . . . . . . .	Byte	 000000AF _DATA	
+prompt_1 . . . . . . . . . . . .	Byte	 000000B4 _DATA	
+prompt_2 . . . . . . . . . . . .	Byte	 000000DA _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
 rightNumber  . . . . . . . . . .	DWord	 00000008 _DATA	
 tempNumber . . . . . . . . . . .	DWord	 0000000C _DATA	

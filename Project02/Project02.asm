@@ -26,6 +26,7 @@ count			DWORD	0	;for counting within loop
 userName		BYTE	33 DUP(0)	;string to be entered by user
 intro_1			BYTE	"     Fibonacci Numbers     by Andrew Wilson ", 0
 ec_1			BYTE	"**EC: Displays results in neat columns", 0
+ec_2			BYTE	"**EC: Displays results AMAZING TECHNICOLOR", 0
 prompt_1		BYTE	"What's your name? ", 0
 intro_2			BYTE	"Nice to meet you, ", 0
 prompt_2		BYTE	"How many numbers would you like to calculate? (1-46)", 0
@@ -41,6 +42,9 @@ main PROC
 	call	WriteString
 	call	crlf
 	mov		edx, OFFSET	ec_1
+	call	WriteString
+	call	crlf
+	mov		edx, OFFSET	ec_2
 	call	WriteString
 	call	crlf
 	call	crlf
@@ -85,7 +89,22 @@ NumberTooLow:
 InputGood:
 	call	crlf
 	mov		ecx, numberOfNumbers
+
 top:
+	inc		count
+	mov		eax, count
+	test	ax, 1				;test if even or odd to deterine color (LSB is 1 or 0)
+	jnz		Color1
+	jz		Color2
+Color1:
+	mov		eax, lightgreen + (green * 16)	;change text color, just for fun
+	call	SetTextColor
+	jmp		FinishedWithColors
+Color2:
+	mov		eax, lightblue + (blue * 16)	;change text color, just for fun
+	call	SetTextColor
+
+FinishedWithColors:
 	mov		eax, rightNumber	;display current number
 	call	WriteDec
 
@@ -100,8 +119,7 @@ top:
 	call	WriteChar
 	call	WriteChar
 
-	inc		count				;check if count is divisible by 5
-	mov		eax, count
+	mov		eax, count			;check if count is divisible by 5
 	mov		ebx, 5
 	cdq
 	div		ebx
@@ -109,34 +127,36 @@ top:
 	je		DivisibleBy5
 	jmp		NotDivisibleBy5
 
-DivisibleBy5:					;if count is divisible by 5, newline, except if 40 or more
-	mov		eax, count
+
+DivisibleBy5:					;if count is divisible by 5, newline, except if 40 or more,
+	mov		eax, count			;because of the default console window size
 	cmp		eax, 40				
 	jge		NoNewline
 	call	crlf
 NoNewline:
-	loop	top	
+	dec		ecx					;decrement ecx, jumping to the top if not 0, or to the end if 0
+	jnz		top
 	jmp		LoopFinished
+
 
 NotDivisibleBy5:				;if count less than 35, tab. Otherwise, nothing
 	mov		ebx, count
 	cmp		ebx, 35
 	jg		MoreThan35
 	jmp		LessThan35
-
 LessThan35:						
 	mov		eax, 9	
 	call	WriteChar
-	loop	top
+MoreThan35:						
+	dec		ecx					;decrement ecx, jumping to the top if not 0, or to the end if 0
+	jnz		top
 	jmp		LoopFinished
 
-MoreThan35:						
-	jmp		NoNewline			;we should have "loop	top" here but it is too by 2 byes.
-								;Instead we jump to NoNewLine because all it does is loop
-								;and jump to the end if loop is finished
 
 ;display a parting message to the user by name.
 LoopFinished:
+	mov		eax, lightgray + (black * 16) ;change text color, just for fun
+	call	SetTextColor
 	call	crlf
 	call	crlf
 	mov		edx, OFFSET	goodBye
