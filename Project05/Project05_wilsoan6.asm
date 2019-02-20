@@ -1,10 +1,10 @@
-TITLE Composite Numbers    (Project04.asm)
+TITLE Sorting Random Integers    (Project05.asm)
 
 ; Author: Andrew Wilson
 ; Last Modified: Feb 10, 2019
 ; OSU email address: wilsoan6@oregonstate.edu
 ; Course number/section: 271-400
-; Project Number: #4                Due Date: Feb 18, 2019
+; Project Number: #5                Due Date: March 3, 2019
 ; Description: This program displays composite numbers.
 ;			   It will prompt the user to enter the number of composites to be displayed, validate the input,
 ;			   then  calculate and display all of the composite numbers up to and including the nth composite.
