@@ -25,6 +25,7 @@ intro_3			BYTE	"displays the original list, sorts the list, and calculates the",
 intro_4			BYTE	"median value. Finally, it displays the list sorted in descending order.", 0
 title_1			BYTE	"The unsorted random numbers:", 0
 title_2			BYTE	"The sorted list:", 0
+title_3			BYTE	"The median is: ", 0
 ec_1			BYTE	"**EC: Aligns the output columns", 0
 prompt_1		BYTE	"How many numbers should be generated? [10 .. 200]: ", 0
 error_1			BYTE	"Please enter a number between 10 and 200: ",0
@@ -33,9 +34,17 @@ error_1			BYTE	"Please enter a number between 10 and 200: ",0
 main PROC
 
 	call	randomize
+
+	push	OFFSET intro_1
+	push	OFFSET intro_2
+	push	OFFSET intro_3
+	push	OFFSET intro_4
 	call	introduction
 	
-	push	OFFSET numberOfInts		;pass numberOfInts by reference
+
+	push	OFFSET error_1
+	push	OFFSET prompt_1
+	push	OFFSET numberOfInts		
 	call	getUserData
 
 	push	OFFSET arrayOfInts
@@ -51,8 +60,10 @@ main PROC
 	push	numberOfInts
 	call	sortList
 
-		;i. exchange elements (for most sorting algorithms): {parameters: array[i] (reference), array[j] (reference), where i and j are the indexes of elements to be exchanged}
-	;F. display median {parameters: array (reference), request (value)}
+	push	OFFSET title_3	
+	push	OFFSET arrayOfInts
+	push	numberOfInts
+	call	displayMedian
 
 	push	OFFSET title_2	
 	push	OFFSET arrayOfInts
@@ -70,26 +81,25 @@ main ENDP
 ;registers changed: edx
 ;********************************************************************************************************
 introduction	PROC
+	push	ebp
+	mov		ebp, esp
 
-	mov		edx, OFFSET	intro_1
+	mov		edx, [ebp+20]	;@intro_1
 	call	WriteString
 	call	crlf
-;	mov		edx, OFFSET	ec_1
-;	call	WriteString
-;	call	crlf
-	call	crlf
-	mov		edx, OFFSET	intro_2
+	mov		edx, [ebp+16]	;@intro_2
 	call	WriteString
 	call	crlf
-	mov		edx, OFFSET	intro_3
+	mov		edx, [ebp+12]	;@intro_3
 	call	WriteString
 	call	crlf
-	mov		edx, OFFSET	intro_4
+	mov		edx, [ebp+8]	;@intro_4
 	call	WriteString
 	call	crlf
 	call	crlf
 
-	ret
+	pop		ebp
+	ret		16
 introduction	ENDP
 
 ;********************************************************************************************************
@@ -102,10 +112,9 @@ introduction	ENDP
 getUserData	PROC
 	push	ebp
 	mov		ebp, esp
-	mov		edx, OFFSET	prompt_1
+	mov		edx, [ebp+12]	;prompt_1
 	call	WriteString
 	call	ReadInt
-	call	Crlf
 
 TryAgain:					;validates that input is between MIN-MAX
 	cmp		eax, MIN
@@ -115,7 +124,7 @@ TryAgain:					;validates that input is between MIN-MAX
 	jmp		AllIsWell
 
 InvalidInput:
-	mov		edx, OFFSET	error_1
+	mov		edx, [ebp+16]	;error_1
 	call	WriteString
 	call	ReadInt
 	jmp		TryAgain
@@ -123,8 +132,10 @@ InvalidInput:
 AllIsWell:
 	mov		ebx, [ebp+8]
 	mov		[ebx], eax	
+
+	call	Crlf
 	pop		ebp
-	ret		4
+	ret		12
 getUserData	ENDP
 
 ;********************************************************************************************************
@@ -229,6 +240,61 @@ exchange	ENDP
 
 
 ;********************************************************************************************************
+;Procedure to calculate and display median
+;receives: array of dword ints, number of ints, title to display
+;returns: prints median to console
+;preconditions: push title, array address, then number of ints
+;registers changed: eax, ebx, edx
+;********************************************************************************************************
+displayMedian	PROC
+	push	ebp
+	mov		ebp, esp
+	mov		edx, [ebp+16]	;@title
+	call	WriteString
+
+	mov		edi, [ebp+12]	;@arrayOfInts
+	mov		eax, [ebp+8]	;number of ints
+
+	mov		ebx, 2
+	cdq
+	div		ebx				;divide count by 2 (ignoring remainder) for index of middle element
+	mov		ebx, 4
+	mul		ebx				;multiply by 4 to get offset from array
+
+	test	ax, 1			;test if count is even or odd (LSB is 1 or 0)
+	jz		isEven
+	jnz		isOdd
+
+isOdd:
+	mov		edx, [edi+eax]
+	mov		eax, edx
+	call	WriteDec
+	jmp		theEnd
+isEven:
+	mov		edx, [edi+eax]
+	sub		eax, 4
+	add		edx, [edi+eax]	;sum the two middle numbers
+	mov		eax, edx
+	mov		ebx, 2
+	cdq
+	div		ebx				;divide by two
+	call	WriteDec
+	test	dx, 1			;if there is a remainder, display '.5'
+	jz		theEnd			
+	mov		eax, 46			;46 is ASCII '.'
+	call	WriteChar
+	mov		eax, 53			;53 is ASCII '5'
+	call	WriteChar
+
+theEnd:
+	call	crlf
+	call	crlf
+
+	pop		ebp
+	ret		12
+displayMedian	ENDP
+
+;********************************************************************************************************
 ;Procedure to display an array of DWORD integers
 ;receives: address of title of array to display, address of array of dwords to store ints, number of ints to generate
 ;returns: -
@@ -262,8 +328,9 @@ noNewLine:
 
 	call	crlf
 	call	crlf
+
 	pop		ebp
-	ret		9
+	ret		12
 displayList	ENDP
 
 END main
