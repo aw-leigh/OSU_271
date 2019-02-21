@@ -5,185 +5,265 @@ TITLE Sorting Random Integers    (Project05.asm)
 ; OSU email address: wilsoan6@oregonstate.edu
 ; Course number/section: 271-400
 ; Project Number: #5                Due Date: March 3, 2019
-; Description: This program displays composite numbers.
-;			   It will prompt the user to enter the number of composites to be displayed, validate the input,
-;			   then  calculate and display all of the composite numbers up to and including the nth composite.
-;			   It will then display a parting message to the user by name.
+; Description: This program generates random numbers in the range [100 .. 999],
+;			   displays the original list, sorts the list, and calculates the
+;			   median value. Finally, it displays the list sorted in descending order.
 
 INCLUDE Irvine32.inc
 
-; (insert constant definitions here)
+LO = 100	;lowest int value
+HI = 999	;highest int value
+MIN = 10	;min number of ints
+MAX = 200	;max number of ints
 
 .data
-MAXCOMPOSITE =  400			;maximum value for user input
-numberToShow	DWORD	?	;user specified number of composite numbers to show
-numberToTest	DWORD	?	;current number to test if composite
-counter			DWORD	0	;used to space columns
-primeNumbers	DWORD	2, 3, 5, 7, 11, 13, 17, 19, 23, 0; 23 is enough because 23^2 > 495 (see sieve of eratosthenes)
-intro_1			BYTE	"Welcome to Composite Numbers by Andrew Wilson ", 0
+numberOfInts	DWORD	?			;user specified number of ints to show
+arrayOfInts		DWORD	MAX	DUP(?)	;array of ints.
+intro_1			BYTE	"Welcome to Sorting Random Integers     by Andrew Wilson ", 0
+intro_2			BYTE	"This program generates random numbers in the range [100 .. 999],", 0
+intro_3			BYTE	"displays the original list, sorts the list, and calculates the", 0
+intro_4			BYTE	"median value. Finally, it displays the list sorted in descending order.", 0
+title_1			BYTE	"The unsorted random numbers:", 0
+title_2			BYTE	"The sorted list:", 0
 ec_1			BYTE	"**EC: Aligns the output columns", 0
-prompt_1		BYTE	"Enter the number of composite numbers you would like to see.", 0
-prompt_2		BYTE	"I'll accept orders for up to 400 composites: ", 0
-error_1			BYTE	"Please enter a number between 1 and 400: ",0
-goodBye			BYTE	"Thank you for playing Composite Numbers!", 0
+prompt_1		BYTE	"How many numbers should be generated? [10 .. 200]: ", 0
+error_1			BYTE	"Please enter a number between 10 and 200: ",0
 
 .code
 main PROC
 
+	call	randomize
 	call	introduction
+	
+	push	OFFSET numberOfInts		;pass numberOfInts by reference
 	call	getUserData
-	call	showComposites
-	call	farewell
+
+	push	OFFSET arrayOfInts
+	push	numberOfInts
+	call	fillArray
+
+	push	OFFSET title_1	
+	push	OFFSET arrayOfInts
+	push	numberOfInts
+	call	displayList
+
+	push	OFFSET arrayOfInts
+	push	numberOfInts
+	call	sortList
+
+		;i. exchange elements (for most sorting algorithms): {parameters: array[i] (reference), array[j] (reference), where i and j are the indexes of elements to be exchanged}
+	;F. display median {parameters: array (reference), request (value)}
+
+	push	OFFSET title_2	
+	push	OFFSET arrayOfInts
+	push	numberOfInts
+	call	displayList
 
 	exit	; exit to operating system
 main ENDP
 
+;********************************************************************************************************
 ;Procedure to introduce the program.
 ;receives: none
 ;returns: none
-;preconditions:  needs strings called intro_1, prompt_1, prompt_2, and ec_1
+;preconditions:  needs strings called intro_1, intro_2, intro_3, intro_4 and ec_1
 ;registers changed: edx
+;********************************************************************************************************
 introduction	PROC
 
 	mov		edx, OFFSET	intro_1
 	call	WriteString
 	call	crlf
+;	mov		edx, OFFSET	ec_1
+;	call	WriteString
+;	call	crlf
 	call	crlf
-	mov		edx, OFFSET	prompt_1
+	mov		edx, OFFSET	intro_2
 	call	WriteString
 	call	crlf
-	mov		edx, OFFSET	ec_1
+	mov		edx, OFFSET	intro_3
+	call	WriteString
+	call	crlf
+	mov		edx, OFFSET	intro_4
 	call	WriteString
 	call	crlf
 	call	crlf
-	mov		edx, OFFSET	prompt_2
-	call	WriteString
 
 	ret
 introduction	ENDP
 
-
-;Procedure to get value for numberToShow from the user.
-;receives: none
-;returns: user input values for global variable numberToShow
-;preconditions:  needs to store int in "numberToShow"
-;registers changed: eax, edx
+;********************************************************************************************************
+;Procedure to get value for numberOfInts from the user.
+;receives: numberOfInts
+;returns: user input values for variable numberOfInts
+;preconditions:  push numberOfInts before calling
+;registers changed: eax, ebx, edx
+;********************************************************************************************************
 getUserData	PROC
+	push	ebp
+	mov		ebp, esp
+	mov		edx, OFFSET	prompt_1
+	call	WriteString
 	call	ReadInt
-	mov		numberToShow, eax	
-	call	validate
+	call	Crlf
 
-	ret
-getUserData	ENDP
-
-
-;Procedure to validate that numberToShow is between 1-400
-;receives: none
-;returns: validated value for global variable numberToShow
-;preconditions:  none
-;registers changed: eax,edx
-validate	PROC
-
-TryAgain:
-	mov		eax, numberToShow
-	cmp		eax, 1
+TryAgain:					;validates that input is between MIN-MAX
+	cmp		eax, MIN
 	jb		invalidInput
-	cmp		eax, MAXCOMPOSITE
+	cmp		eax, MAX
 	ja		invalidInput
 	jmp		AllIsWell
+
 InvalidInput:
 	mov		edx, OFFSET	error_1
 	call	WriteString
 	call	ReadInt
-	mov		numberToShow, eax
 	jmp		TryAgain
 
 AllIsWell:
-	ret
-validate	ENDP
+	mov		ebx, [ebp+8]
+	mov		[ebx], eax	
+	pop		ebp
+	ret		4
+getUserData	ENDP
 
-;Procedure to display composite numbers between 1-400
-;receives: none
-;returns: none
-;preconditions:  numberToShow is the number of composites to output 
-;registers changed: eax, ecx
-showComposites	PROC
-	mov		ecx, numberToShow
-	mov		numberToTest, 4		;start at the first composite number, 4
-
-L1:
-	call	isComposite
-	inc		numberToTest
-	loop	L1
-	ret
-showComposites	ENDP
-
-;Procedure to determine whether a number is composite or not
-;receives: none
-;returns: assumes it will be used in a loop, so increments ecx if result is prime
-;preconditions:  numberToTest is the initial number to test (2 or greater),
-;				 needs a global array of prime numbers called "primeNumbers" that starts at 2 and ends with 0.
-;registers changed: eax, ebx, ecx, edx, esi
-isComposite	PROC
-	mov		eax, numberToTest			
-	mov		esi, OFFSET primeNumbers	;point to the beginning of the primes array
-
-tryAgain:
-	mov		edx, 0
-	mov		eax, numberToTest
-	mov		ebx, [esi]					;move the first prime number into ebx
-	cmp		eax, ebx					;if the number being compared is equal to the current prime divisor,
-	je		prime						;then it's prime
-	cdq								
-	div		ebx
-	cmp		edx, 0						;if remainder = 0, it's composite
-	jz		foundComposite
-	add		esi, 4
-	mov		ebx, [esi]					;move the next prime number into ebx
-	cmp		ebx, 0						;check if it's 0. If so, we've reached the end of the list and the number is prime
-	je		prime						
-	jmp		tryAgain
-
-prime:
-	inc		ecx							;if number is prime, add 1 to ecx to counteract the dec ecx in outer loop
-	jmp		done						;so that the prime number doesn't count against the number of composites to show
-
-foundComposite:
-	mov		eax, numberToTest			;print the number
-	call	WriteDec
-	mov		eax, 9						;9 is ASCII tab, used to space columns
-	call	WriteChar
-	
-	inc		counter
-	mov		eax, counter				;check if counter is divisible by 10
-	mov		ebx, 10
-	cdq
-	div		ebx
-	cmp		edx, 0
-	je		DivisibleBy10				;if it is, newline
-	jmp		done
-
-DivisibleBy10:
-	call	crlf
-
-done:
-	ret
-isComposite	ENDP
-
-
-;Procedure to display farewell message to user.
-;receives: none
-;returns: none
-;preconditions:  needs string "goodBye"
+;********************************************************************************************************
+;Procedure to fill array with random numbers
+;receives: array of dwords to store ints, number of ints to generate
+;returns: random ints into array
+;preconditions: push array address, then number of ints
 ;registers changed: edx
-farewell	PROC
-	call	crlf
-	mov		edx, OFFSET	goodBye
+;********************************************************************************************************
+fillArray	PROC
+	push	ebp
+	mov		ebp, esp
+	mov		edi, [ebp+12]	;@arrayOfInts
+	mov		ecx, [ebp+8]	;loop counter
+
+again:
+	mov		eax, HI-LO
+	inc		eax
+	call	randomrange
+	add		eax, LO			;eax now contains random number between HI and LO
+	mov		[edi], eax		;store it in the array
+	add		edi, 4			;move to the next element
+	loop	again
+
+	pop		ebp
+	ret		8
+fillArray	ENDP
+
+;********************************************************************************************************
+;Bubble sorts array of ints high to low
+;receives: array of dwords to store ints, length of array
+;returns: sorted ints into array
+;preconditions: push array address, then number of ints
+;registers changed: eax, ebx, ecx, edx
+;********************************************************************************************************
+sortList	PROC
+	push	ebp
+	mov		ebp, esp
+	mov		ecx, [ebp+8]	;loop counter
+	mov		ebx, -1			;ebx tracks number of times inner loop has occurred
+							;bubble sort sorts 1 element per loop, so we need to loop element number of times
+							;Starts at -1 because it is incremented immediately in loop
+
+outer:
+	mov		esi, [ebp+12]	;@arrayOfInts
+	push	ecx				;push outer loop counter
+	inc		ebx				;ebx tracks number of times inner loop has occurred
+	mov		ecx, [ebp+8]	;loop the length of the array...
+	sub		ecx, ebx		;...minus the number of sorted elements
+	
+	dec		ecx				;;;;
+	cmp		ebx, 0			;this block decrements ecx by 1 on the first time thought the loop
+	je		inner			;to prevent out-of-bounds access if the array is MAX size
+	inc		ecx				;;;;
+
+
+inner:
+	mov		eax, [esi]		;move contents of left array element into eax
+	cmp		eax, [esi+4]	;compare to contents of right array element
+	jb		swap
+	jmp		noSwap
+swap:		
+	push	esi				;@left element
+	add		esi, 4
+	push	esi				;@right element
+	sub		esi, 4
+	call	exchange
+noSwap:
+	add		esi, 4
+	loop	inner
+finished:
+	pop		ecx				;restore outer loop counter
+	loop	outer
+
+	pop		ebp
+	ret		8
+sortList	ENDP
+
+;********************************************************************************************************
+;Swaps two ints
+;receives: two ints by reference
+;returns: swapped ints
+;preconditions: push two DWORD ints
+;registers changed: eax, edx
+;********************************************************************************************************
+exchange	PROC
+	push	ebp
+	mov		ebp, esp
+	mov		edi, [ebp+12]	;@left element
+	mov		eax, [edi]		;left element
+	mov		edi, [ebp+8]	;@right element
+	mov		edx, [edi]		;right element
+
+	mov		[edi], eax
+	mov		edi, [ebp+12]	;@left element
+	mov		[edi], edx
+
+	pop		ebp
+	ret		8
+
+exchange	ENDP
+
+
+;********************************************************************************************************
+;Procedure to display an array of DWORD integers
+;receives: address of title of array to display, address of array of dwords to store ints, number of ints to generate
+;returns: -
+;preconditions: push title, array address, then number of ints
+;registers changed: eax, ecx, edx
+;********************************************************************************************************
+displayList	PROC
+	push	ebp
+	mov		ebp, esp
+	mov		edx, [ebp+16]	;@title
 	call	WriteString
 	call	crlf
+	mov		esi, [ebp+12]	;@arrayOfInts
+	mov		ecx, [ebp+8]	;loop counter
+	mov		edx, 0			;use edx as a counter to space lines
 
-	ret
-farewell	ENDP
+again:
+	mov		eax,[esi]		;put array value in eax
+	call	WriteDec
+	mov		eax, 9			;9 is ASCII tab, used to space columns
+	call	WriteChar
+	inc		edx
+	cmp		edx, 10			
+	jne		noNewLine		;if 10 characters have been written, newline, then set edx back to 0
+	call	crlf
+	mov		edx, 0
 
+noNewLine:
+	add		esi, 4			;move to the next element
+	loop	again
+
+	call	crlf
+	call	crlf
+	pop		ebp
+	ret		9
+displayList	ENDP
 
 END main

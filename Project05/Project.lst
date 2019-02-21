@@ -1,18 +1,17 @@
-Microsoft (R) Macro Assembler Version 14.16.27026.1	    02/20/19 11:15:04
-$Composite Numbers    (Project04.asm			     Page 1 - 1
+Microsoft (R) Macro Assembler Version 14.16.27026.1	    02/21/19 17:44:15
+*Sorting Random Integers    (Project05.asm		     Page 1 - 1
 
 
-				TITLE Composite Numbers    (Project04.asm)
+				TITLE Sorting Random Integers    (Project05.asm)
 
 				; Author: Andrew Wilson
 				; Last Modified: Feb 10, 2019
 				; OSU email address: wilsoan6@oregonstate.edu
 				; Course number/section: 271-400
-				; Project Number: #4                Due Date: Feb 18, 2019
-				; Description: This program displays composite numbers.
-				;			   It will prompt the user to enter the number of composites to be displayed, validate the input,
-				;			   then  calculate and display all of the composite numbers up to and including the nth composite.
-				;			   It will then display a parting message to the user by name.
+				; Project Number: #5                Due Date: March 3, 2019
+				; Description: This program generates random numbers in the range [100 .. 999],
+				;			   displays the original list, sorts the list, and calculates the
+				;			   median value. Finally, it displays the list sorted in descending order.
 
 				INCLUDE Irvine32.inc
 			      C ; Include file for Irvine32.lib             (Irvine32.inc)
@@ -33,247 +32,349 @@ $Composite Numbers    (Project04.asm			     Page 1 - 1
 			      C .LIST
 			      C 
 
-				; (insert constant definitions here)
+ = 00000064			LO = 100	;lowest int value
+ = 000003E7			HI = 999	;highest int value
+ = 0000000A			MIN = 10	;min number of ints
+ = 000000C8			MAX = 200	;max number of ints
 
  00000000			.data
- = 00000190			MAXCOMPOSITE =  400			;maximum value for user input
- 00000000 00000000		numberToShow	DWORD	?	;user specified number of composite numbers to show
- 00000004 00000000		numberToTest	DWORD	?	;current number to test if composite
- 00000008 00000000		counter			DWORD	0	;used to space columns
- 0000000C 00000002		primeNumbers	DWORD	2, 3, 5, 7, 11, 13, 17, 19, 23, 0; 23 is enough because 23^2 > 495 (see sieve of eratosthenes)
-	   00000003
-	   00000005
-	   00000007
-	   0000000B
-	   0000000D
-	   00000011
-	   00000013
-	   00000017
-	   00000000
- 00000034 57 65 6C 63 6F	intro_1			BYTE	"Welcome to Composite Numbers by Andrew Wilson ", 0
+ 00000000 00000000		numberOfInts	DWORD	?			;user specified number of ints to show
+ 00000004  000000C8 [		arrayOfInts		DWORD	MAX	DUP(?)	;array of ints.
+	    00000000
+	   ]
+ 00000324 57 65 6C 63 6F	intro_1			BYTE	"Welcome to Sorting Random Integers     by Andrew Wilson ", 0
 	   6D 65 20 74 6F
-	   20 43 6F 6D 70
-	   6F 73 69 74 65
-	   20 4E 75 6D 62
-	   65 72 73 20 62
+	   20 53 6F 72 74
+	   69 6E 67 20 52
+	   61 6E 64 6F 6D
+	   20 49 6E 74 65
+	   67 65 72 73 20
+	   20 20 20 20 62
 	   79 20 41 6E 64
 	   72 65 77 20 57
 	   69 6C 73 6F 6E
 	   20 00
- 00000063 2A 2A 45 43 3A	ec_1			BYTE	"**EC: Aligns the output columns", 0
+ 0000035D 54 68 69 73 20	intro_2			BYTE	"This program generates random numbers in the range [100 .. 999],", 0
+	   70 72 6F 67 72
+	   61 6D 20 67 65
+	   6E 65 72 61 74
+	   65 73 20 72 61
+	   6E 64 6F 6D 20
+	   6E 75 6D 62 65
+	   72 73 20 69 6E
+	   20 74 68 65 20
+	   72 61 6E 67 65
+	   20 5B 31 30 30
+	   20 2E 2E 20 39
+	   39 39 5D 2C 00
+ 0000039E 64 69 73 70 6C	intro_3			BYTE	"displays the original list, sorts the list, and calculates the", 0
+	   61 79 73 20 74
+	   68 65 20 6F 72
+	   69 67 69 6E 61
+	   6C 20 6C 69 73
+	   74 2C 20 73 6F
+	   72 74 73 20 74
+	   68 65 20 6C 69
+	   73 74 2C 20 61
+	   6E 64 20 63 61
+	   6C 63 75 6C 61
+	   74 65 73 20 74
+	   68 65 00
+ 000003DD 6D 65 64 69 61	intro_4			BYTE	"median value. Finally, it displays the list sorted in descending order.", 0
+	   6E 20 76 61 6C
+	   75 65 2E 20 46
+	   69 6E 61 6C 6C
+	   79 2C 20 69 74
+	   20 64 69 73 70
+	   6C 61 79 73 20
+	   74 68 65 20 6C
+	   69 73 74 20 73
+	   6F 72 74 65 64
+	   20 69 6E 20 64
+	   65 73 63 65 6E
+	   64 69 6E 67 20
+	   6F 72 64 65 72
+	   2E 00
+ 00000425 54 68 65 20 75	title_1			BYTE	"The unsorted random numbers:", 0
+	   6E 73 6F 72 74
+	   65 64 20 72 61
+	   6E 64 6F 6D 20
+	   6E 75 6D 62 65
+	   72 73 3A 00
+ 00000442 54 68 65 20 73	title_2			BYTE	"The sorted list:", 0
+	   6F 72 74 65 64
+	   20 6C 69 73 74
+	   3A 00
+ 00000453 2A 2A 45 43 3A	ec_1			BYTE	"**EC: Aligns the output columns", 0
 	   20 41 6C 69 67
 	   6E 73 20 74 68
 	   65 20 6F 75 74
 	   70 75 74 20 63
 	   6F 6C 75 6D 6E
 	   73 00
- 00000083 45 6E 74 65 72	prompt_1		BYTE	"Enter the number of composite numbers you would like to see.", 0
-	   20 74 68 65 20
-	   6E 75 6D 62 65
-	   72 20 6F 66 20
-	   63 6F 6D 70 6F
-	   73 69 74 65 20
-	   6E 75 6D 62 65
-	   72 73 20 79 6F
-	   75 20 77 6F 75
-	   6C 64 20 6C 69
-	   6B 65 20 74 6F
-	   20 73 65 65 2E
-	   00
- 000000C0 49 27 6C 6C 20	prompt_2		BYTE	"I'll accept orders for up to 400 composites: ", 0
-	   61 63 63 65 70
-	   74 20 6F 72 64
-	   65 72 73 20 66
-	   6F 72 20 75 70
-	   20 74 6F 20 34
-	   30 30 20 63 6F
-	   6D 70 6F 73 69
-	   74 65 73 3A 20
-	   00
- 000000EE 50 6C 65 61 73	error_1			BYTE	"Please enter a number between 1 and 400: ",0
+ 00000473 48 6F 77 20 6D	prompt_1		BYTE	"How many numbers should be generated? [10 .. 200]: ", 0
+	   61 6E 79 20 6E
+	   75 6D 62 65 72
+	   73 20 73 68 6F
+	   75 6C 64 20 62
+	   65 20 67 65 6E
+	   65 72 61 74 65
+	   64 3F 20 5B 31
+	   30 20 2E 2E 20
+	   32 30 30 5D 3A
+	   20 00
+ 000004A7 50 6C 65 61 73	error_1			BYTE	"Please enter a number between 10 and 200: ",0
 	   65 20 65 6E 74
 	   65 72 20 61 20
 	   6E 75 6D 62 65
 	   72 20 62 65 74
 	   77 65 65 6E 20
-	   31 20 61 6E 64
-	   20 34 30 30 3A
-	   20 00
- 00000118 54 68 61 6E 6B	goodBye			BYTE	"Thank you for playing Composite Numbers!", 0
-	   20 79 6F 75 20
-	   66 6F 72 20 70
-	   6C 61 79 69 6E
-	   67 20 43 6F 6D
-	   70 6F 73 69 74
-	   65 20 4E 75 6D
-	   62 65 72 73 21
-	   00
+	   31 30 20 61 6E
+	   64 20 32 30 30
+	   3A 20 00
 
  00000000			.code
  00000000			main PROC
 
- 00000000  E8 00000016			call	introduction
- 00000005  E8 00000053			call	getUserData
- 0000000A  E8 00000088			call	showComposites
- 0000000F  E8 00000106			call	farewell
+ 00000000  E8 00000000 E		call	randomize
+ 00000005  E8 0000005B			call	introduction
+					
+ 0000000A  68 00000000 R		push	OFFSET numberOfInts		;pass numberOfInts by reference
+ 0000000F  E8 00000098			call	getUserData
+
+ 00000014  68 00000004 R		push	OFFSET arrayOfInts
+ 00000019  FF 35 00000000 R		push	numberOfInts
+ 0000001F  E8 000000C7			call	fillArray
+
+ 00000024  68 00000425 R		push	OFFSET title_1	
+ 00000029  68 00000004 R		push	OFFSET arrayOfInts
+ 0000002E  FF 35 00000000 R		push	numberOfInts
+ 00000034  E8 0000012A			call	displayList
+
+ 00000039  68 00000004 R		push	OFFSET arrayOfInts
+ 0000003E  FF 35 00000000 R		push	numberOfInts
+ 00000044  E8 000000C4			call	sortList
+
+						;i. exchange elements (for most sorting algorithms): {parameters: array[i] (reference), array[j] (reference), where i and j are the indexes of elements to be exchanged}
+					;F. display median {parameters: array (reference), request (value)}
+
+ 00000049  68 00000442 R		push	OFFSET title_2	
+ 0000004E  68 00000004 R		push	OFFSET arrayOfInts
+ 00000053  FF 35 00000000 R		push	numberOfInts
+ 00000059  E8 00000105			call	displayList
 
 					exit	; exit to operating system
- 00000014  6A 00	   *	    push   +000000000h
- 00000016  E8 00000000 E   *	    call   ExitProcess
- 0000001B			main ENDP
+ 0000005E  6A 00	   *	    push   +000000000h
+ 00000060  E8 00000000 E   *	    call   ExitProcess
+ 00000065			main ENDP
 
+				;********************************************************************************************************
 				;Procedure to introduce the program.
 				;receives: none
 				;returns: none
-				;preconditions:  needs strings called intro_1, prompt_1, prompt_2, and ec_1
+				;preconditions:  needs strings called intro_1, intro_2, intro_3, intro_4 and ec_1
 				;registers changed: edx
- 0000001B			introduction	PROC
+				;********************************************************************************************************
+ 00000065			introduction	PROC
 
- 0000001B  BA 00000034 R		mov		edx, OFFSET	intro_1
- 00000020  E8 00000000 E		call	WriteString
- 00000025  E8 00000000 E		call	crlf
- 0000002A  E8 00000000 E		call	crlf
- 0000002F  BA 00000083 R		mov		edx, OFFSET	prompt_1
- 00000034  E8 00000000 E		call	WriteString
- 00000039  E8 00000000 E		call	crlf
- 0000003E  BA 00000063 R		mov		edx, OFFSET	ec_1
- 00000043  E8 00000000 E		call	WriteString
- 00000048  E8 00000000 E		call	crlf
- 0000004D  E8 00000000 E		call	crlf
- 00000052  BA 000000C0 R		mov		edx, OFFSET	prompt_2
- 00000057  E8 00000000 E		call	WriteString
+ 00000065  BA 00000324 R		mov		edx, OFFSET	intro_1
+ 0000006A  E8 00000000 E		call	WriteString
+ 0000006F  E8 00000000 E		call	crlf
+				;	mov		edx, OFFSET	ec_1
+				;	call	WriteString
+				;	call	crlf
+ 00000074  E8 00000000 E		call	crlf
+ 00000079  BA 0000035D R		mov		edx, OFFSET	intro_2
+ 0000007E  E8 00000000 E		call	WriteString
+ 00000083  E8 00000000 E		call	crlf
+ 00000088  BA 0000039E R		mov		edx, OFFSET	intro_3
+ 0000008D  E8 00000000 E		call	WriteString
+ 00000092  E8 00000000 E		call	crlf
+ 00000097  BA 000003DD R		mov		edx, OFFSET	intro_4
+ 0000009C  E8 00000000 E		call	WriteString
+ 000000A1  E8 00000000 E		call	crlf
+ 000000A6  E8 00000000 E		call	crlf
 
- 0000005C  C3				ret
- 0000005D			introduction	ENDP
+ 000000AB  C3				ret
+ 000000AC			introduction	ENDP
 
+				;********************************************************************************************************
+				;Procedure to get value for numberOfInts from the user.
+				;receives: numberOfInts
+				;returns: user input values for variable numberOfInts
+				;preconditions:  push numberOfInts before calling
+				;registers changed: eax, ebx, edx
+				;********************************************************************************************************
+ 000000AC			getUserData	PROC
+ 000000AC  55				push	ebp
+ 000000AD  8B EC			mov		ebp, esp
+ 000000AF  BA 00000473 R		mov		edx, OFFSET	prompt_1
+ 000000B4  E8 00000000 E		call	WriteString
+ 000000B9  E8 00000000 E		call	ReadInt
+ 000000BE  E8 00000000 E		call	Crlf
 
-				;Procedure to get value for numberToShow from the user.
-				;receives: none
-				;returns: user input values for global variable numberToShow
-				;preconditions:  needs to store int in "numberToShow"
-				;registers changed: eax, edx
- 0000005D			getUserData	PROC
- 0000005D  E8 00000000 E		call	ReadInt
- 00000062  A3 00000000 R		mov		numberToShow, eax	
- 00000067  E8 00000001			call	validate
+ 000000C3			TryAgain:					;validates that input is between MIN-MAX
+ 000000C3  83 F8 0A			cmp		eax, MIN
+ 000000C6  72 09			jb		invalidInput
+ 000000C8  3D 000000C8			cmp		eax, MAX
+ 000000CD  77 02			ja		invalidInput
+ 000000CF  EB 11			jmp		AllIsWell
 
- 0000006C  C3				ret
- 0000006D			getUserData	ENDP
+ 000000D1			InvalidInput:
+ 000000D1  BA 000004A7 R		mov		edx, OFFSET	error_1
+ 000000D6  E8 00000000 E		call	WriteString
+ 000000DB  E8 00000000 E		call	ReadInt
+ 000000E0  EB E1			jmp		TryAgain
 
+ 000000E2			AllIsWell:
+ 000000E2  8B 5D 08			mov		ebx, [ebp+8]
+ 000000E5  89 03			mov		[ebx], eax	
+ 000000E7  5D				pop		ebp
+ 000000E8  C2 0004			ret		4
+ 000000EB			getUserData	ENDP
 
-				;Procedure to validate that numberToShow is between 1-400
-				;receives: none
-				;returns: validated value for global variable numberToShow
-				;preconditions:  none
-				;registers changed: eax,edx
- 0000006D			validate	PROC
+				;********************************************************************************************************
+				;Procedure to fill array with random numbers
+				;receives: array of dwords to store ints, number of ints to generate
+				;returns: random ints into array
+				;preconditions: push array address, then number of ints
+				;registers changed: edx
+				;********************************************************************************************************
+ 000000EB			fillArray	PROC
+ 000000EB  55				push	ebp
+ 000000EC  8B EC			mov		ebp, esp
+ 000000EE  8B 7D 0C			mov		edi, [ebp+12]	;@arrayOfInts
+ 000000F1  8B 4D 08			mov		ecx, [ebp+8]	;loop counter
 
- 0000006D			TryAgain:
- 0000006D  A1 00000000 R		mov		eax, numberToShow
- 00000072  83 F8 01			cmp		eax, 1
- 00000075  72 09			jb		invalidInput
- 00000077  3D 00000190			cmp		eax, MAXCOMPOSITE
- 0000007C  77 02			ja		invalidInput
- 0000007E  EB 16			jmp		AllIsWell
- 00000080			InvalidInput:
- 00000080  BA 000000EE R		mov		edx, OFFSET	error_1
- 00000085  E8 00000000 E		call	WriteString
- 0000008A  E8 00000000 E		call	ReadInt
- 0000008F  A3 00000000 R		mov		numberToShow, eax
- 00000094  EB D7			jmp		TryAgain
+ 000000F4			again:
+ 000000F4  B8 00000383			mov		eax, HI-LO
+ 000000F9  40				inc		eax
+ 000000FA  E8 00000000 E		call	randomrange
+ 000000FF  83 C0 64			add		eax, LO			;eax now contains random number between HI and LO
+ 00000102  89 07			mov		[edi], eax		;store it in the array
+ 00000104  83 C7 04			add		edi, 4			;move to the next element
+ 00000107  E2 EB			loop	again
 
- 00000096			AllIsWell:
- 00000096  C3				ret
- 00000097			validate	ENDP
+ 00000109  5D				pop		ebp
+ 0000010A  C2 0008			ret		8
+ 0000010D			fillArray	ENDP
 
-				;Procedure to display composite numbers between 1-400
-				;receives: none
-				;returns: none
-				;preconditions:  numberToShow is the number of composites to output 
-				;registers changed: eax, ecx
- 00000097			showComposites	PROC
- 00000097  8B 0D 00000000 R		mov		ecx, numberToShow
- 0000009D  C7 05 00000004 R		mov		numberToTest, 4		;start at the first composite number, 4
-	   00000004
+				;********************************************************************************************************
+				;Bubble sorts array of ints high to low
+				;receives: array of dwords to store ints, length of array
+				;returns: sorted ints into array
+				;preconditions: push array address, then number of ints
+				;registers changed: eax, ebx, ecx, edx
+				;********************************************************************************************************
+ 0000010D			sortList	PROC
+ 0000010D  55				push	ebp
+ 0000010E  8B EC			mov		ebp, esp
+ 00000110  8B 4D 08			mov		ecx, [ebp+8]	;loop counter
+ 00000113  BB FFFFFFFF			mov		ebx, -1			;ebx tracks number of times inner loop has occurred
+											;bubble sort sorts 1 element per loop, so we need to loop element number of times
+											;Starts at -1 because it is incremented immediately in loop
 
- 000000A7			L1:
- 000000A7  E8 00000009			call	isComposite
- 000000AC  FF 05 00000004 R		inc		numberToTest
- 000000B2  E2 F3			loop	L1
- 000000B4  C3				ret
- 000000B5			showComposites	ENDP
-
-				;Procedure to determine whether a number is composite or not
-				;receives: none
-				;returns: assumes it will be used in a loop, so increments ecx if result is prime
-				;preconditions:  numberToTest is the initial number to test (2 or greater),
-				;				 needs a global array of prime numbers called "primeNumbers" that starts at 2 and ends with 0.
-				;registers changed: eax, ebx, ecx, edx, esi
- 000000B5			isComposite	PROC
- 000000B5  A1 00000004 R		mov		eax, numberToTest			
- 000000BA  BE 0000000C R		mov		esi, OFFSET primeNumbers	;point to the beginning of the primes array
-
- 000000BF			tryAgain:
- 000000BF  BA 00000000			mov		edx, 0
- 000000C4  A1 00000004 R		mov		eax, numberToTest
- 000000C9  8B 1E			mov		ebx, [esi]					;move the first prime number into ebx
- 000000CB  3B C3			cmp		eax, ebx					;if the number being compared is equal to the current prime divisor,
- 000000CD  74 14			je		prime						;then it's prime
- 000000CF  99				cdq								
- 000000D0  F7 F3			div		ebx
- 000000D2  83 FA 00			cmp		edx, 0						;if remainder = 0, it's composite
- 000000D5  74 0F			jz		foundComposite
- 000000D7  83 C6 04			add		esi, 4
- 000000DA  8B 1E			mov		ebx, [esi]					;move the next prime number into ebx
- 000000DC  83 FB 00			cmp		ebx, 0						;check if it's 0. If so, we've reached the end of the list and the number is prime
- 000000DF  74 02			je		prime						
- 000000E1  EB DC			jmp		tryAgain
-
- 000000E3			prime:
- 000000E3  41				inc		ecx							;if number is prime, add 1 to ecx to counteract the dec ecx in outer loop
- 000000E4  EB 33			jmp		done						;so that the prime number doesn't count against the number of composites to show
-
- 000000E6			foundComposite:
- 000000E6  A1 00000004 R		mov		eax, numberToTest			;print the number
- 000000EB  E8 00000000 E		call	WriteDec
- 000000F0  B8 00000009			mov		eax, 9						;9 is ASCII tab, used to space columns
- 000000F5  E8 00000000 E		call	WriteChar
+ 00000118			outer:
+ 00000118  8B 75 0C			mov		esi, [ebp+12]	;@arrayOfInts
+ 0000011B  51				push	ecx				;push outer loop counter
+ 0000011C  43				inc		ebx				;ebx tracks number of times inner loop has occurred
+ 0000011D  8B 4D 08			mov		ecx, [ebp+8]	;loop the length of the array...
+ 00000120  2B CB			sub		ecx, ebx		;...minus the number of sorted elements
 					
- 000000FA  FF 05 00000008 R		inc		counter
- 00000100  A1 00000008 R		mov		eax, counter				;check if counter is divisible by 10
- 00000105  BB 0000000A			mov		ebx, 10
- 0000010A  99				cdq
- 0000010B  F7 F3			div		ebx
- 0000010D  83 FA 00			cmp		edx, 0
- 00000110  74 02			je		DivisibleBy10				;if it is, newline
- 00000112  EB 05			jmp		done
-
- 00000114			DivisibleBy10:
- 00000114  E8 00000000 E		call	crlf
-
- 00000119			done:
- 00000119  C3				ret
- 0000011A			isComposite	ENDP
+ 00000122  49				dec		ecx				;;;;
+ 00000123  83 FB 00			cmp		ebx, 0			;this block decrements ecx by 1 on the first time thought the loop
+ 00000126  74 01			je		inner			;to prevent out-of-bounds access if the array is MAX size
+ 00000128  41				inc		ecx				;;;;
 
 
-				;Procedure to display farewell message to user.
-				;receives: none
-				;returns: none
-				;preconditions:  needs string "goodBye"
-				;registers changed: edx
- 0000011A			farewell	PROC
- 0000011A  E8 00000000 E		call	crlf
- 0000011F  BA 00000118 R		mov		edx, OFFSET	goodBye
- 00000124  E8 00000000 E		call	WriteString
- 00000129  E8 00000000 E		call	crlf
+ 00000129			inner:
+ 00000129  8B 06			mov		eax, [esi]		;move contents of left array element into eax
+ 0000012B  3B 46 04			cmp		eax, [esi+4]	;compare to contents of right array element
+ 0000012E  72 02			jb		swap
+ 00000130  EB 0D			jmp		noSwap
+ 00000132			swap:		
+ 00000132  56				push	esi				;@left element
+ 00000133  83 C6 04			add		esi, 4
+ 00000136  56				push	esi				;@right element
+ 00000137  83 EE 04			sub		esi, 4
+ 0000013A  E8 0000000C			call	exchange
+ 0000013F			noSwap:
+ 0000013F  83 C6 04			add		esi, 4
+ 00000142  E2 E5			loop	inner
+ 00000144			finished:
+ 00000144  59				pop		ecx				;restore outer loop counter
+ 00000145  E2 D1			loop	outer
 
- 0000012E  C3				ret
- 0000012F			farewell	ENDP
+ 00000147  5D				pop		ebp
+ 00000148  C2 0008			ret		8
+ 0000014B			sortList	ENDP
 
+				;********************************************************************************************************
+				;Swaps two ints
+				;receives: two ints by reference
+				;returns: swapped ints
+				;preconditions: push two DWORD ints
+				;registers changed: eax, edx
+				;********************************************************************************************************
+ 0000014B			exchange	PROC
+ 0000014B  55				push	ebp
+ 0000014C  8B EC			mov		ebp, esp
+ 0000014E  8B 7D 0C			mov		edi, [ebp+12]	;@left element
+ 00000151  8B 07			mov		eax, [edi]		;left element
+ 00000153  8B 7D 08			mov		edi, [ebp+8]	;@right element
+ 00000156  8B 17			mov		edx, [edi]		;right element
+
+ 00000158  89 07			mov		[edi], eax
+ 0000015A  8B 7D 0C			mov		edi, [ebp+12]	;@left element
+ 0000015D  89 17			mov		[edi], edx
+
+ 0000015F  5D				pop		ebp
+ 00000160  C2 0008			ret		8
+
+ 00000163			exchange	ENDP
+
+
+				;********************************************************************************************************
+				;Procedure to display an array of DWORD integers
+				;receives: address of title of array to display, address of array of dwords to store ints, number of ints to generate
+				;returns: -
+				;preconditions: push title, array address, then number of ints
+				;registers changed: eax, ecx, edx
+				;********************************************************************************************************
+ 00000163			displayList	PROC
+ 00000163  55				push	ebp
+ 00000164  8B EC			mov		ebp, esp
+ 00000166  8B 55 10			mov		edx, [ebp+16]	;@title
+ 00000169  E8 00000000 E		call	WriteString
+ 0000016E  E8 00000000 E		call	crlf
+ 00000173  8B 75 0C			mov		esi, [ebp+12]	;@arrayOfInts
+ 00000176  8B 4D 08			mov		ecx, [ebp+8]	;loop counter
+ 00000179  BA 00000000			mov		edx, 0			;use edx as a counter to space lines
+
+ 0000017E			again:
+ 0000017E  8B 06			mov		eax,[esi]		;put array value in eax
+ 00000180  E8 00000000 E		call	WriteDec
+ 00000185  B8 00000009			mov		eax, 9			;9 is ASCII tab, used to space columns
+ 0000018A  E8 00000000 E		call	WriteChar
+ 0000018F  42				inc		edx
+ 00000190  83 FA 0A			cmp		edx, 10			
+ 00000193  75 0A			jne		noNewLine		;if 10 characters have been written, newline, then set edx back to 0
+ 00000195  E8 00000000 E		call	crlf
+ 0000019A  BA 00000000			mov		edx, 0
+
+ 0000019F			noNewLine:
+ 0000019F  83 C6 04			add		esi, 4			;move to the next element
+ 000001A2  E2 DA			loop	again
+
+ 000001A4  E8 00000000 E		call	crlf
+ 000001A9  E8 00000000 E		call	crlf
+ 000001AE  5D				pop		ebp
+ 000001AF  C2 0009			ret		9
+ 000001B2			displayList	ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.16.27026.1	    02/20/19 11:15:04
-$Composite Numbers    (Project04.asm			     Symbols 2 - 1
+Microsoft (R) Macro Assembler Version 14.16.27026.1	    02/21/19 17:44:15
+*Sorting Random Integers    (Project05.asm		     Symbols 2 - 1
 
 
 
@@ -366,8 +467,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000141 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000012F Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 000004D2 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000001B2 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -474,24 +575,26 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-farewell . . . . . . . . . . . .	P Near	 0000011A _TEXT	Length= 00000015 Public STDCALL
-getUserData  . . . . . . . . . .	P Near	 0000005D _TEXT	Length= 00000010 Public STDCALL
-introduction . . . . . . . . . .	P Near	 0000001B _TEXT	Length= 00000042 Public STDCALL
-isComposite  . . . . . . . . . .	P Near	 000000B5 _TEXT	Length= 00000065 Public STDCALL
-  tryAgain . . . . . . . . . . .	L Near	 000000BF _TEXT	
-  prime  . . . . . . . . . . . .	L Near	 000000E3 _TEXT	
-  foundComposite . . . . . . . .	L Near	 000000E6 _TEXT	
-  DivisibleBy10  . . . . . . . .	L Near	 00000114 _TEXT	
-  done . . . . . . . . . . . . .	L Near	 00000119 _TEXT	
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000001B Public STDCALL
+displayList  . . . . . . . . . .	P Near	 00000163 _TEXT	Length= 0000004F Public STDCALL
+  again  . . . . . . . . . . . .	L Near	 0000017E _TEXT	
+  noNewLine  . . . . . . . . . .	L Near	 0000019F _TEXT	
+exchange . . . . . . . . . . . .	P Near	 0000014B _TEXT	Length= 00000018 Public STDCALL
+fillArray  . . . . . . . . . . .	P Near	 000000EB _TEXT	Length= 00000022 Public STDCALL
+  again  . . . . . . . . . . . .	L Near	 000000F4 _TEXT	
+getUserData  . . . . . . . . . .	P Near	 000000AC _TEXT	Length= 0000003F Public STDCALL
+  TryAgain . . . . . . . . . . .	L Near	 000000C3 _TEXT	
+  InvalidInput . . . . . . . . .	L Near	 000000D1 _TEXT	
+  AllIsWell  . . . . . . . . . .	L Near	 000000E2 _TEXT	
+introduction . . . . . . . . . .	P Near	 00000065 _TEXT	Length= 00000047 Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000065 Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
-showComposites . . . . . . . . .	P Near	 00000097 _TEXT	Length= 0000001E Public STDCALL
-  L1 . . . . . . . . . . . . . .	L Near	 000000A7 _TEXT	
-validate . . . . . . . . . . . .	P Near	 0000006D _TEXT	Length= 0000002A Public STDCALL
-  TryAgain . . . . . . . . . . .	L Near	 0000006D _TEXT	
-  InvalidInput . . . . . . . . .	L Near	 00000080 _TEXT	
-  AllIsWell  . . . . . . . . . .	L Near	 00000096 _TEXT	
+sortList . . . . . . . . . . . .	P Near	 0000010D _TEXT	Length= 0000003E Public STDCALL
+  outer  . . . . . . . . . . . .	L Near	 00000118 _TEXT	
+  inner  . . . . . . . . . . . .	L Near	 00000129 _TEXT	
+  swap . . . . . . . . . . . . .	L Near	 00000132 _TEXT	
+  noSwap . . . . . . . . . . . .	L Near	 0000013F _TEXT	
+  finished . . . . . . . . . . .	L Near	 00000144 _TEXT	
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 
 
@@ -563,6 +666,7 @@ HEAP_GROWABLE  . . . . . . . . .	Number	 00000002h
 HEAP_NO_SERIALIZE  . . . . . . .	Number	 00000001h   
 HEAP_REALLOC_IN_PLACE_ONLY . . .	Number	 00000010h   
 HEAP_ZERO_MEMORY . . . . . . . .	Number	 00000008h   
+HI . . . . . . . . . . . . . . .	Number	 000003E7h   
 IDABORT  . . . . . . . . . . . .	Number	 00000003h   
 IDCANCEL . . . . . . . . . . . .	Number	 00000002h   
 IDCLOSE  . . . . . . . . . . . .	Number	 00000008h   
@@ -581,7 +685,8 @@ KEY_EVENT  . . . . . . . . . . .	Number	 00000001h
 KEY_MASKS  . . . . . . . . . . .	Number	 0000001Fh   
 LEFT_ALT_PRESSED . . . . . . . .	Number	 00000002h   
 LEFT_CTRL_PRESSED  . . . . . . .	Number	 00000008h   
-MAXCOMPOSITE . . . . . . . . . .	Number	 00000190h   
+LO . . . . . . . . . . . . . . .	Number	 00000064h   
+MAX  . . . . . . . . . . . . . .	Number	 000000C8h   
 MB_ABORTRETRYIGNORE  . . . . . .	Number	 00000002h   
 MB_APPLMODAL . . . . . . . . . .	Number	 00000000h   
 MB_CANCELTRYCONTINUE . . . . . .	Number	 00000006h   
@@ -607,6 +712,7 @@ MB_USERICON  . . . . . . . . . .	Number	 00000080h
 MB_YESNOCANCEL . . . . . . . . .	Number	 00000003h   
 MB_YESNO . . . . . . . . . . . .	Number	 00000004h   
 MENU_EVENT . . . . . . . . . . .	Number	 00000008h   
+MIN  . . . . . . . . . . . . . .	Number	 0000000Ah   
 MOUSE_EVENT  . . . . . . . . . .	Number	 00000002h   
 MessageBox . . . . . . . . . . .	Text   	 MessageBoxA
 NULL . . . . . . . . . . . . . .	Number	 00000000h   
@@ -709,18 +815,20 @@ VK_UP  . . . . . . . . . . . . .	Number	 00000026h
 WINDOW_BUFFER_SIZE_EVENT . . . .	Number	 00000004h   
 WriteConsoleOutputCharacter  . .	Text   	 WriteConsoleOutputCharacterA
 WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
+arrayOfInts  . . . . . . . . . .	DWord	 00000004 _DATA	
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
-counter  . . . . . . . . . . . .	DWord	 00000008 _DATA	
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
-ec_1 . . . . . . . . . . . . . .	Byte	 00000063 _DATA	
-error_1  . . . . . . . . . . . .	Byte	 000000EE _DATA	
+ec_1 . . . . . . . . . . . . . .	Byte	 00000453 _DATA	
+error_1  . . . . . . . . . . . .	Byte	 000004A7 _DATA	
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
-goodBye  . . . . . . . . . . . .	Byte	 00000118 _DATA	
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
-intro_1  . . . . . . . . . . . .	Byte	 00000034 _DATA	
+intro_1  . . . . . . . . . . . .	Byte	 00000324 _DATA	
+intro_2  . . . . . . . . . . . .	Byte	 0000035D _DATA	
+intro_3  . . . . . . . . . . . .	Byte	 0000039E _DATA	
+intro_4  . . . . . . . . . . . .	Byte	 000003DD _DATA	
 lightBlue  . . . . . . . . . . .	Number	 00000009h   
 lightCyan  . . . . . . . . . . .	Number	 0000000Bh   
 lightGray  . . . . . . . . . . .	Number	 00000007h   
@@ -728,12 +836,11 @@ lightGreen . . . . . . . . . . .	Number	 0000000Ah
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
 magenta  . . . . . . . . . . . .	Number	 00000005h   
-numberToShow . . . . . . . . . .	DWord	 00000000 _DATA	
-numberToTest . . . . . . . . . .	DWord	 00000004 _DATA	
-primeNumbers . . . . . . . . . .	DWord	 0000000C _DATA	
-prompt_1 . . . . . . . . . . . .	Byte	 00000083 _DATA	
-prompt_2 . . . . . . . . . . . .	Byte	 000000C0 _DATA	
+numberOfInts . . . . . . . . . .	DWord	 00000000 _DATA	
+prompt_1 . . . . . . . . . . . .	Byte	 00000473 _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
+title_1  . . . . . . . . . . . .	Byte	 00000425 _DATA	
+title_2  . . . . . . . . . . . .	Byte	 00000442 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   
