@@ -130,7 +130,7 @@ InvalidInput:
 	jmp		TryAgain
 
 AllIsWell:
-	mov		ebx, [ebp+8]
+	mov		ebx, [ebp+8]	;@numberOfInts
 	mov		[ebx], eax	
 
 	call	Crlf
@@ -187,7 +187,7 @@ outer:
 	sub		ecx, ebx		;...minus the number of sorted elements
 	
 	dec		ecx				;;;;
-	cmp		ebx, 0			;this block decrements ecx by 1 on the first time thought the loop
+	cmp		ebx, 0			;this block decrements ecx by 1 on the first time through the loop
 	je		inner			;to prevent out-of-bounds access if the array is MAX size
 	inc		ecx				;;;;
 
@@ -259,22 +259,22 @@ displayMedian	PROC
 	cdq
 	div		ebx				;divide count by 2 (ignoring remainder) for index of middle element
 	mov		ebx, 4
-	mul		ebx				;multiply by 4 to get offset from array
+	mul		ebx				;multiply by 4 to get offset from array, stored in eax
+	mov		ebx, eax		;store this offset in ebx
 
-	test	ax, 1			;test if count is even or odd (LSB is 1 or 0)
+	mov		eax, [ebp+8]	;number of ints
+	test	eax, 1			;test if count is even or odd (LSB is 1 or 0)
 	jz		isEven
-	jnz		isOdd
+	jmp		isOdd
 
-isOdd:
-	mov		edx, [edi+eax]
-	mov		eax, edx
+isOdd:						;if odd, print value of middle element
+	mov		eax, [edi+ebx]	
 	call	WriteDec
 	jmp		theEnd
-isEven:
-	mov		edx, [edi+eax]
-	sub		eax, 4
-	add		edx, [edi+eax]	;sum the two middle numbers
-	mov		eax, edx
+isEven:						;if even, print mean of middle two elements
+	mov		eax, [edi+ebx]
+	sub		ebx, 4
+	add		eax, [edi+ebx]	;sum the two middle numbers
 	mov		ebx, 2
 	cdq
 	div		ebx				;divide by two

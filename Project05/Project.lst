@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.16.27026.1	    02/21/19 21:26:49
+Microsoft (R) Macro Assembler Version 14.16.27026.1	    02/27/19 13:39:01
 *Sorting Random Integers    (Project05.asm		     Page 1 - 1
 
 
@@ -161,7 +161,7 @@ Microsoft (R) Macro Assembler Version 14.16.27026.1	    02/21/19 21:26:49
  00000042  68 00000425 R		push	OFFSET title_1	
  00000047  68 00000004 R		push	OFFSET arrayOfInts
  0000004C  FF 35 00000000 R		push	numberOfInts
- 00000052  E8 000001A9			call	displayList
+ 00000052  E8 000001AB			call	displayList
 
  00000057  68 00000004 R		push	OFFSET arrayOfInts
  0000005C  FF 35 00000000 R		push	numberOfInts
@@ -175,7 +175,7 @@ Microsoft (R) Macro Assembler Version 14.16.27026.1	    02/21/19 21:26:49
  0000007C  68 00000442 R		push	OFFSET title_2	
  00000081  68 00000004 R		push	OFFSET arrayOfInts
  00000086  FF 35 00000000 R		push	numberOfInts
- 0000008C  E8 0000016F			call	displayList
+ 0000008C  E8 00000171			call	displayList
 
 					exit	; exit to operating system
  00000091  6A 00	   *	    push   +000000000h
@@ -239,7 +239,7 @@ Microsoft (R) Macro Assembler Version 14.16.27026.1	    02/21/19 21:26:49
  00000103  EB E3			jmp		TryAgain
 
  00000105			AllIsWell:
- 00000105  8B 5D 08			mov		ebx, [ebp+8]
+ 00000105  8B 5D 08			mov		ebx, [ebp+8]	;@numberOfInts
  00000108  89 03			mov		[ebx], eax	
 
  0000010A  E8 00000000 E		call	Crlf
@@ -296,7 +296,7 @@ Microsoft (R) Macro Assembler Version 14.16.27026.1	    02/21/19 21:26:49
  00000148  2B CB			sub		ecx, ebx		;...minus the number of sorted elements
 					
  0000014A  49				dec		ecx				;;;;
- 0000014B  83 FB 00			cmp		ebx, 0			;this block decrements ecx by 1 on the first time thought the loop
+ 0000014B  83 FB 00			cmp		ebx, 0			;this block decrements ecx by 1 on the first time through the loop
  0000014E  74 01			je		inner			;to prevent out-of-bounds access if the array is MAX size
  00000150  41				inc		ecx				;;;;
 
@@ -368,40 +368,40 @@ Microsoft (R) Macro Assembler Version 14.16.27026.1	    02/21/19 21:26:49
  000001A1  99				cdq
  000001A2  F7 F3			div		ebx				;divide count by 2 (ignoring remainder) for index of middle element
  000001A4  BB 00000004			mov		ebx, 4
- 000001A9  F7 E3			mul		ebx				;multiply by 4 to get offset from array
+ 000001A9  F7 E3			mul		ebx				;multiply by 4 to get offset from array, stored in eax
+ 000001AB  8B D8			mov		ebx, eax		;store this offset in ebx
 
- 000001AB  66| A9 0001			test	ax, 1			;test if count is even or odd (LSB is 1 or 0)
- 000001AF  74 0E			jz		isEven
- 000001B1  75 00			jnz		isOdd
+ 000001AD  8B 45 08			mov		eax, [ebp+8]	;number of ints
+ 000001B0  A9 00000001			test	eax, 1			;test if count is even or odd (LSB is 1 or 0)
+ 000001B5  74 0C			jz		isEven
+ 000001B7  EB 00			jmp		isOdd
 
- 000001B3			isOdd:
- 000001B3  8B 14 07			mov		edx, [edi+eax]
- 000001B6  8B C2			mov		eax, edx
- 000001B8  E8 00000000 E		call	WriteDec
- 000001BD  EB 33			jmp		theEnd
- 000001BF			isEven:
- 000001BF  8B 14 07			mov		edx, [edi+eax]
- 000001C2  83 E8 04			sub		eax, 4
- 000001C5  03 14 07			add		edx, [edi+eax]	;sum the two middle numbers
- 000001C8  8B C2			mov		eax, edx
- 000001CA  BB 00000002			mov		ebx, 2
- 000001CF  99				cdq
- 000001D0  F7 F3			div		ebx				;divide by two
- 000001D2  E8 00000000 E		call	WriteDec
- 000001D7  66| F7 C2 0001		test	dx, 1			;if there is a remainder, display '.5'
- 000001DC  74 14			jz		theEnd			
- 000001DE  B8 0000002E			mov		eax, 46			;46 is ASCII '.'
- 000001E3  E8 00000000 E		call	WriteChar
- 000001E8  B8 00000035			mov		eax, 53			;53 is ASCII '5'
- 000001ED  E8 00000000 E		call	WriteChar
+ 000001B9			isOdd:						;if odd, print value of middle element
+ 000001B9  8B 04 1F			mov		eax, [edi+ebx]	
+ 000001BC  E8 00000000 E		call	WriteDec
+ 000001C1  EB 31			jmp		theEnd
+ 000001C3			isEven:						;if even, print mean of middle two elements
+ 000001C3  8B 04 1F			mov		eax, [edi+ebx]
+ 000001C6  83 EB 04			sub		ebx, 4
+ 000001C9  03 04 1F			add		eax, [edi+ebx]	;sum the two middle numbers
+ 000001CC  BB 00000002			mov		ebx, 2
+ 000001D1  99				cdq
+ 000001D2  F7 F3			div		ebx				;divide by two
+ 000001D4  E8 00000000 E		call	WriteDec
+ 000001D9  66| F7 C2 0001		test	dx, 1			;if there is a remainder, display '.5'
+ 000001DE  74 14			jz		theEnd			
+ 000001E0  B8 0000002E			mov		eax, 46			;46 is ASCII '.'
+ 000001E5  E8 00000000 E		call	WriteChar
+ 000001EA  B8 00000035			mov		eax, 53			;53 is ASCII '5'
+ 000001EF  E8 00000000 E		call	WriteChar
 
- 000001F2			theEnd:
- 000001F2  E8 00000000 E		call	crlf
- 000001F7  E8 00000000 E		call	crlf
+ 000001F4			theEnd:
+ 000001F4  E8 00000000 E		call	crlf
+ 000001F9  E8 00000000 E		call	crlf
 
- 000001FC  5D				pop		ebp
- 000001FD  C2 000C			ret		12
- 00000200			displayMedian	ENDP
+ 000001FE  5D				pop		ebp
+ 000001FF  C2 000C			ret		12
+ 00000202			displayMedian	ENDP
 
 				;********************************************************************************************************
 				;Procedure to display an array of DWORD integers
@@ -410,40 +410,40 @@ Microsoft (R) Macro Assembler Version 14.16.27026.1	    02/21/19 21:26:49
 				;preconditions: push title, array address, then number of ints
 				;registers changed: eax, ecx, edx
 				;********************************************************************************************************
- 00000200			displayList	PROC
- 00000200  55				push	ebp
- 00000201  8B EC			mov		ebp, esp
- 00000203  8B 55 10			mov		edx, [ebp+16]	;@title
- 00000206  E8 00000000 E		call	WriteString
- 0000020B  E8 00000000 E		call	crlf
- 00000210  8B 75 0C			mov		esi, [ebp+12]	;@arrayOfInts
- 00000213  8B 4D 08			mov		ecx, [ebp+8]	;loop counter
- 00000216  BA 00000000			mov		edx, 0			;use edx as a counter to space lines
+ 00000202			displayList	PROC
+ 00000202  55				push	ebp
+ 00000203  8B EC			mov		ebp, esp
+ 00000205  8B 55 10			mov		edx, [ebp+16]	;@title
+ 00000208  E8 00000000 E		call	WriteString
+ 0000020D  E8 00000000 E		call	crlf
+ 00000212  8B 75 0C			mov		esi, [ebp+12]	;@arrayOfInts
+ 00000215  8B 4D 08			mov		ecx, [ebp+8]	;loop counter
+ 00000218  BA 00000000			mov		edx, 0			;use edx as a counter to space lines
 
- 0000021B			again:
- 0000021B  8B 06			mov		eax,[esi]		;put array value in eax
- 0000021D  E8 00000000 E		call	WriteDec
- 00000222  B8 00000009			mov		eax, 9			;9 is ASCII tab, used to space columns
- 00000227  E8 00000000 E		call	WriteChar
- 0000022C  42				inc		edx
- 0000022D  83 FA 0A			cmp		edx, 10			
- 00000230  75 0A			jne		noNewLine		;if 10 characters have been written, newline, then set edx back to 0
- 00000232  E8 00000000 E		call	crlf
- 00000237  BA 00000000			mov		edx, 0
+ 0000021D			again:
+ 0000021D  8B 06			mov		eax,[esi]		;put array value in eax
+ 0000021F  E8 00000000 E		call	WriteDec
+ 00000224  B8 00000009			mov		eax, 9			;9 is ASCII tab, used to space columns
+ 00000229  E8 00000000 E		call	WriteChar
+ 0000022E  42				inc		edx
+ 0000022F  83 FA 0A			cmp		edx, 10			
+ 00000232  75 0A			jne		noNewLine		;if 10 characters have been written, newline, then set edx back to 0
+ 00000234  E8 00000000 E		call	crlf
+ 00000239  BA 00000000			mov		edx, 0
 
- 0000023C			noNewLine:
- 0000023C  83 C6 04			add		esi, 4			;move to the next element
- 0000023F  E2 DA			loop	again
+ 0000023E			noNewLine:
+ 0000023E  83 C6 04			add		esi, 4			;move to the next element
+ 00000241  E2 DA			loop	again
 
- 00000241  E8 00000000 E		call	crlf
- 00000246  E8 00000000 E		call	crlf
+ 00000243  E8 00000000 E		call	crlf
+ 00000248  E8 00000000 E		call	crlf
 
- 0000024B  5D				pop		ebp
- 0000024C  C2 000C			ret		12
- 0000024F			displayList	ENDP
+ 0000024D  5D				pop		ebp
+ 0000024E  C2 000C			ret		12
+ 00000251			displayList	ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.16.27026.1	    02/21/19 21:26:49
+Microsoft (R) Macro Assembler Version 14.16.27026.1	    02/27/19 13:39:01
 *Sorting Random Integers    (Project05.asm		     Symbols 2 - 1
 
 
@@ -538,7 +538,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 000004E2 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000024F Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000251 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -645,13 +645,13 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-displayList  . . . . . . . . . .	P Near	 00000200 _TEXT	Length= 0000004F Public STDCALL
-  again  . . . . . . . . . . . .	L Near	 0000021B _TEXT	
-  noNewLine  . . . . . . . . . .	L Near	 0000023C _TEXT	
-displayMedian  . . . . . . . . .	P Near	 0000018B _TEXT	Length= 00000075 Public STDCALL
-  isOdd  . . . . . . . . . . . .	L Near	 000001B3 _TEXT	
-  isEven . . . . . . . . . . . .	L Near	 000001BF _TEXT	
-  theEnd . . . . . . . . . . . .	L Near	 000001F2 _TEXT	
+displayList  . . . . . . . . . .	P Near	 00000202 _TEXT	Length= 0000004F Public STDCALL
+  again  . . . . . . . . . . . .	L Near	 0000021D _TEXT	
+  noNewLine  . . . . . . . . . .	L Near	 0000023E _TEXT	
+displayMedian  . . . . . . . . .	P Near	 0000018B _TEXT	Length= 00000077 Public STDCALL
+  isOdd  . . . . . . . . . . . .	L Near	 000001B9 _TEXT	
+  isEven . . . . . . . . . . . .	L Near	 000001C3 _TEXT	
+  theEnd . . . . . . . . . . . .	L Near	 000001F4 _TEXT	
 exchange . . . . . . . . . . . .	P Near	 00000173 _TEXT	Length= 00000018 Public STDCALL
 fillArray  . . . . . . . . . . .	P Near	 00000113 _TEXT	Length= 00000022 Public STDCALL
   again  . . . . . . . . . . . .	L Near	 0000011C _TEXT	
